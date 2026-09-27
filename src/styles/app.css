@@ -434,8 +434,8 @@
   .topbar-updated { font-size: 0.75rem; }
   .main-content { padding: 1.25rem 1rem 1.75rem; }
   .app-footer { padding-inline: 1rem; font-size: 0.6875rem; }
-  .hero-actions { width: 100%; gap: 0.5rem; }
-  .hero-actions .button { flex: 1; padding-inline: 0.75rem; font-size: 0.8125rem; }
+  .hero-actions { width: auto; align-items: flex-start; flex-direction: column; gap: 0.625rem; }
+  .hero-actions .button { flex: none; padding-inline: 1.125rem; font-size: 0.875rem; white-space: nowrap; }
   .overview-context, .journey-sidebar, .home-aside { grid-template-columns: minmax(0, 1fr); }
   .latest-card, .timeline-surface { padding: 1.125rem; }
   .journal-preview-row { grid-template-columns: minmax(0, 1fr) 1.25rem; gap: 0.5rem 0.875rem; padding-block: 1rem; }
