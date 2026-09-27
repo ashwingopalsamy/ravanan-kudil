@@ -231,8 +231,8 @@ export function elapsedCalendarDays(start: string, end: string): number {
 export function recordedSpend(records: PublicRecords): number | null {
   const payments = records.finance.filter((item) => item.kind === "payment" || item.kind === "refund");
   if (payments.length === 0) return null;
-  const sum = payments.reduce((total, item) => total + (item.kind === "payment" ? item.amountPaise : -item.amountPaise), 0);
-  return sum;
+  const sum = payments.reduce((total, item) => total + (item.kind === "payment" ? BigInt(item.amountPaise) : -BigInt(item.amountPaise)), 0n);
+  return Number(sum);
 }
 
 export function workSummary(records: PublicRecords): { workdays: number | null; workerDays: number | null; incomplete: boolean } {
@@ -252,11 +252,11 @@ export function sortedEntries(records: PublicRecords): JournalEntry[] {
 }
 
 export function monthlySpend(records: PublicRecords): { month: string; paise: number }[] {
-  const months = new Map<string, number>();
+  const months = new Map<string, bigint>();
   for (const record of records.finance) {
     if (record.kind !== "payment" && record.kind !== "refund") continue;
     const month = record.date.slice(0, 7);
-    months.set(month, (months.get(month) ?? 0) + (record.kind === "payment" ? record.amountPaise : -record.amountPaise));
+    months.set(month, (months.get(month) ?? 0n) + (record.kind === "payment" ? BigInt(record.amountPaise) : -BigInt(record.amountPaise)));
   }
-  return [...months].sort(([left], [right]) => left.localeCompare(right)).map(([month, paise]) => ({ month, paise }));
+  return [...months].sort(([left], [right]) => left.localeCompare(right)).map(([month, paise]) => ({ month, paise: Number(paise) }));
 }
