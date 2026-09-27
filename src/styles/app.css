@@ -538,7 +538,7 @@
   .data-row-icon { width: 2.25rem; height: 2.25rem; }
   .data-row time { font-size: 0.75rem; }
   .data-row-value { max-width: 5.75rem; overflow-wrap: anywhere; font-size: 0.75rem; }
-  .category-tab { gap: 0.375rem; padding-inline: 0.5rem; font-size: 0.875rem; }
+  .category-tab { gap: 0.25rem; padding-inline: 0.375rem; font-size: 0.875rem; }
   .category-tab svg { display: none; }
 }
 
