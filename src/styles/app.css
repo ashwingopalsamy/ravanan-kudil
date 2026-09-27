@@ -259,10 +259,11 @@
 .journal-detail:last-child { border-bottom: 0; }
 .journal-detail summary { display: grid; grid-template-columns: minmax(9rem, 0.72fr) minmax(0, 1fr) 1.5rem; align-items: center; gap: 1rem; min-height: 4.5rem; padding: 0.75rem 0.25rem; cursor: pointer; list-style: none; }
 .journal-detail summary::-webkit-details-marker { display: none; }
-.journal-detail-date, .journal-detail-title { display: grid; gap: 0.25rem; }
-.journal-detail-date time, .journal-detail-title { font-size: 0.875rem; font-weight: 540; font-variant-numeric: tabular-nums; }
-.journal-detail-date small, .journal-detail-title small { color: var(--color-ink-muted); font-size: 0.75rem; font-weight: 400; line-height: 1.4; }
-.journal-detail-title { font-variant-numeric: normal; }
+.journal-detail-date { display: grid; grid-column: 1; gap: 0.25rem; }
+.journal-detail-date time { font-size: 0.8125rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.journal-detail-date small { color: var(--color-ink-muted); font-size: 0.75rem; font-weight: 400; line-height: 1.4; }
+.journal-detail-title { grid-column: 2; font-size: 0.9375rem; font-weight: 600; line-height: 1.4; }
+.journal-detail summary > .disclosure-chevron { grid-column: 3; }
 .disclosure-chevron { color: var(--color-ink-muted); transition: transform var(--duration-standard) var(--ease-standard); }
 .journal-detail[open] .disclosure-chevron, .data-row[open] .disclosure-chevron { transform: rotate(180deg); }
 .journal-detail summary:hover .journal-detail-title, .data-row summary:hover .data-row-main strong { color: var(--color-accent-ink); }
@@ -476,10 +477,10 @@
   .timeline-year { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; padding-block-start: 1.125rem; }
   .timeline-year-label { display: flex; align-items: baseline; gap: 0.5rem; }
   .journal-detail summary { grid-template-columns: minmax(0, 1fr) 1.25rem; gap: 0.375rem 0.625rem; padding-block: 0.875rem; }
-  .journal-detail-date { grid-column: 1; grid-row: 1; display: flex; align-items: baseline; gap: 0.5rem; }
-  .journal-detail-title { grid-column: 1; grid-row: 2; }
+  .journal-detail-title { grid-column: 1; grid-row: 1; }
+  .journal-detail-date { grid-column: 1; grid-row: 2; display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
   .journal-detail summary > .disclosure-chevron { grid-column: 2; grid-row: 1 / span 2; }
-  .journal-detail-date time, .journal-detail-title { font-size: 0.8125rem; }
+  .journal-detail-date time { font-size: 0.75rem; }
   .journal-detail-content { padding-inline-end: 0.25rem; }
   .record-source > div { grid-template-columns: minmax(0, 1fr); gap: 0.125rem; }
   .record-metrics { grid-template-columns: minmax(0, 1fr); }
