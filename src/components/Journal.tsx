@@ -1,13 +1,13 @@
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { formatDate, formatSource, sourceTypeLabel, type JournalEntry } from "../lib/records";
 
-export function JournalPreview({ entries }: { entries: JournalEntry[] }) {
+export function JournalPreview({ entries, previewTextById, siteWorkElapsed }: { entries: JournalEntry[]; previewTextById?: Record<string, string>; siteWorkElapsed?: { days: number; asOf: string } }) {
   return (
     <div className="journal-preview-list">
       {entries.map((entry) => (
         <a className="journal-preview-row" href={`#journey/${entry.id}`} key={entry.id}>
-          <div className="journal-date"><time dateTime={entry.date}>{formatDate(entry.date)}</time><span>{entry.date.length === 7 ? "Month known" : "Dated entry"}</span></div>
-          <div className="journal-copy"><h3>{entry.title}</h3><p>{entry.body}</p><span className="source-line">{formatSource(entry.source)}{entry.corrections?.length ? ` · corrected ${formatDate(entry.corrections[entry.corrections.length - 1].date)}` : ""}</span></div>
+          <div className="journal-date"><time dateTime={entry.date}>{formatDate(entry.date, "long")}</time><span>{entry.date.length === 7 ? "Month known" : "Dated entry"}</span></div>
+          <div className="journal-copy"><h3>{entry.title}</h3><p>{previewTextById?.[entry.id] ?? entry.body}</p><span className="source-line">{formatSource(entry.source)}{entry.corrections?.length ? ` · corrected ${formatDate(entry.corrections[entry.corrections.length - 1].date)}` : ""}</span>{siteWorkElapsed && entry.id === "construction-began" && <span className="journal-elapsed"><strong className="tabular-nums">{siteWorkElapsed.days}</strong> calendar days since site work began · as of {formatDate(siteWorkElapsed.asOf, "long")} · not days worked</span>}</div>
           <ArrowUpRight className="journal-arrow" size={18} aria-hidden="true" />
         </a>
       ))}
