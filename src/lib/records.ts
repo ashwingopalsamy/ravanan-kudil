@@ -204,11 +204,16 @@ const currency = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
   minimumFractionDigits: 0,
-  maximumFractionDigits: 2
+  maximumFractionDigits: 0
 });
 
 export function formatMoney(paise: number): string {
-  return currency.format(paise / 100);
+  if (!Number.isSafeInteger(paise)) throw new RangeError("Money must be a safe integer number of paise");
+  const amount = BigInt(paise);
+  const absolute = amount < 0n ? -amount : amount;
+  const rupees = absolute / 100n;
+  const remainder = absolute % 100n;
+  return `${amount < 0n ? "-" : ""}${currency.format(Number(rupees))}${remainder ? `.${String(remainder).padStart(2, "0")}` : ""}`;
 }
 
 const areaNumber = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
