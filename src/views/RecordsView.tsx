@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Boxes, CalendarDays, ChevronDown, ClipboardList, HardHat, ReceiptText, Search, Truck } from "lucide-react";
+import { MonthlyAttendance } from "../components/MonthlyAttendance";
 import { MonthlySpend } from "../components/MonthlySpend";
 import { formatDate, formatMoney, recordedSpend, sourceTypeLabel, workSummary, type AttendanceRecord, type EquipmentRecord, type FinanceRecord, type MaterialRecord, type PublicRecords } from "../lib/records";
 
@@ -86,6 +87,7 @@ export function RecordsView({ records }: { records: PublicRecords }) {
       }) : counts[category] ? <div className="empty-record empty-record--search"><Search size={24} strokeWidth={1.6} aria-hidden="true" /><h3>No matching records.</h3><p>Try a different search term.</p></div> : <div className="empty-record"><span className="empty-record-icon"><EmptyCategoryIcon size={21} strokeWidth={1.7} aria-hidden="true" /></span><div className="empty-record-copy"><h3>{emptyCopy[category].title}</h3><p>{emptyCopy[category].text}</p></div><div className="empty-record-rule"><span className="overline">How this is counted</span><p>{emptyCopy[category].note}</p></div></div>}</div>
     </section>
     {category === "finance" && <MonthlySpend records={records} />}
+    {category === "labour" && <MonthlyAttendance records={records} />}
     {counts[category] > 0 && <section className="record-method" aria-label="How the record is counted"><div><span className="overline">Calculation notes</span><h2>Measured, not inferred.</h2></div><div><p><strong>Spending</strong> includes payments and refunds only. Bills and quotations stay visible without being counted twice.</p><p><strong>Workdays</strong> and <strong>worker-days</strong> use attendance dates, never payment dates. Unlisted dates stay unknown.</p><p><strong>Material and equipment events</strong> retain their units and actions. A purchase is not proof of delivery or use.</p></div></section>}
   </>;
 }

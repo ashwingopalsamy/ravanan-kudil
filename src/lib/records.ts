@@ -49,7 +49,7 @@ const attendanceSchema = z.object({
   id,
   date: day,
   state: z.enum(["worked", "no_work", "unknown"]),
-  workers: z.number().int().positive().optional(),
+  workers: z.number().int().positive().refine(Number.isSafeInteger, "Worker count exceeds safe integer range").optional(),
   ...provenance,
   note: text.optional()
 }).refine((record) => record.workers === undefined || record.state === "worked", {
@@ -141,6 +141,10 @@ const publicRecordsSchema = z.object({
   for (const record of records.attendance) {
     if (attendanceDates.has(record.date)) context.addIssue({ code: "custom", message: `Duplicate attendance date: ${record.date}` });
     attendanceDates.add(record.date);
+  }
+  const workerDays = records.attendance.reduce((total, record) => total + BigInt(record.workers ?? 0), 0n);
+  if (workerDays > BigInt(Number.MAX_SAFE_INTEGER)) {
+    context.addIssue({ code: "custom", message: "Recorded worker-days exceed safe integer range" });
   }
   const spend = records.finance.reduce((total, record) => {
     if (record.kind === "payment") return total + BigInt(record.amountPaise);
@@ -245,6 +249,30 @@ export function workSummary(records: PublicRecords): { workdays: number | null; 
     workerDays: counted.length > 0 || worked.length === 0 ? workerDays : null,
     incomplete: counted.length < worked.length
   };
+}
+
+export type AttendanceMonth = {
+  month: string;
+  recordedDates: number;
+  workdays: number;
+  knownWorkerDays: number;
+  missingHeadcounts: number;
+};
+
+export function attendanceByMonth(records: PublicRecords): AttendanceMonth[] {
+  const months = new Map<string, AttendanceMonth>();
+  for (const entry of records.attendance) {
+    const month = entry.date.slice(0, 7);
+    const summary = months.get(month) ?? { month, recordedDates: 0, workdays: 0, knownWorkerDays: 0, missingHeadcounts: 0 };
+    summary.recordedDates += 1;
+    if (entry.state === "worked") {
+      summary.workdays += 1;
+      if (entry.workers === undefined) summary.missingHeadcounts += 1;
+      else summary.knownWorkerDays += entry.workers;
+    }
+    months.set(month, summary);
+  }
+  return [...months.values()].sort((left, right) => right.month.localeCompare(left.month));
 }
 
 export function sortedEntries(records: PublicRecords): JournalEntry[] {
