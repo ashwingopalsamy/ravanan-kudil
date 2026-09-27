@@ -42,7 +42,7 @@ function NavigationLinks({ view, mobile = false }: { view: View; mobile?: boolea
   return (
     <nav className={mobile ? "mobile-navigation" : "rail-navigation"} aria-label={mobile ? "Mobile sections" : "Sections"}>
       {navigation.map(({ id, label, icon: Icon }) => (
-        <a className="navigation-link" href={`#${id}`} key={id} aria-label={label} aria-current={view === id ? "page" : undefined} title={mobile ? undefined : label} onClick={() => window.scrollTo(0, 0)}>
+        <a className="navigation-link" href={`#${id}`} key={id} aria-label={label} aria-current={view === id ? "page" : undefined} onClick={() => window.scrollTo(0, 0)}>
           <Icon aria-hidden="true" size={20} strokeWidth={1.8} />
           <span>{label}</span>
         </a>
