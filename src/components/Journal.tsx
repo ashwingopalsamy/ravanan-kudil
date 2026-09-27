@@ -1,5 +1,5 @@
 import { ArrowUpRight, ChevronDown } from "lucide-react";
-import { formatDate, type JournalEntry } from "../lib/records";
+import { formatDate, formatSource, sourceTypeLabel, type JournalEntry } from "../lib/records";
 
 export function JournalPreview({ entries }: { entries: JournalEntry[] }) {
   return (
@@ -7,7 +7,7 @@ export function JournalPreview({ entries }: { entries: JournalEntry[] }) {
       {entries.map((entry) => (
         <a className="journal-preview-row" href={`#journey/${entry.id}`} key={entry.id}>
           <div className="journal-date"><time dateTime={entry.date}>{formatDate(entry.date)}</time><span>{entry.date.length === 7 ? "Month known" : "Dated entry"}</span></div>
-          <div className="journal-copy"><h3>{entry.title}</h3><p>{entry.body}</p><span className="source-line">{entry.source}</span></div>
+          <div className="journal-copy"><h3>{entry.title}</h3><p>{entry.body}</p><span className="source-line">{formatSource(entry.source)}{entry.corrections?.length ? ` · corrected ${formatDate(entry.corrections[entry.corrections.length - 1].date)}` : ""}</span></div>
           <ArrowUpRight className="journal-arrow" size={18} aria-hidden="true" />
         </a>
       ))}
@@ -23,7 +23,7 @@ export function JournalDetail({ entry, selected = false }: { entry: JournalEntry
         <span className="journal-detail-title">{entry.title}<small>Public journal entry</small></span>
         <ChevronDown size={18} aria-hidden="true" className="disclosure-chevron" />
       </summary>
-      <div className="journal-detail-content"><p>{entry.body}</p><div className="record-source"><span>Source</span><strong>{entry.source}</strong></div></div>
+      <div className="journal-detail-content"><p>{entry.body}</p><dl className="record-source"><div><dt>Source type</dt><dd>{sourceTypeLabel(entry.source)}</dd></div><div><dt>Source dated</dt><dd><time dateTime={entry.source.date}>{formatDate(entry.source.date, "long")}</time></dd></div>{entry.source.description && <div><dt>Source note</dt><dd>{entry.source.description}</dd></div>}{entry.corrections?.map((correction, index) => <div className="record-correction" key={`${correction.date}-${index}`}><dt>Correction</dt><dd><time dateTime={correction.date}>{formatDate(correction.date, "long")}</time> · {correction.note}</dd></div>)}</dl></div>
     </details>
   );
 }

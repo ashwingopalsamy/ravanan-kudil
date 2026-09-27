@@ -17,13 +17,20 @@ const text = z.string().trim().min(1);
 const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/);
 const safeAmount = z.number().int().nonnegative().refine(Number.isSafeInteger, "Amount exceeds safe integer range");
 const estimatedArea = z.number().int().positive().refine(Number.isSafeInteger, "Area exceeds safe integer range");
+const sourceSchema = z.object({
+  kind: z.enum(["owner_report", "site_note", "document", "photo", "other"]),
+  date: entryDate,
+  description: text.optional()
+});
+const correctionSchema = z.object({ date: day, note: text });
+const provenance = { source: sourceSchema, corrections: z.array(correctionSchema).optional() };
 
 const entrySchema = z.object({
   id,
   date: entryDate,
   title: text,
   body: text,
-  source: text
+  ...provenance
 });
 
 const financeSchema = z.object({
@@ -33,7 +40,7 @@ const financeSchema = z.object({
   description: text,
   category: text,
   amountPaise: safeAmount,
-  source: text,
+  ...provenance,
   note: text.optional(),
   relatedId: id.optional()
 });
@@ -43,7 +50,7 @@ const attendanceSchema = z.object({
   date: day,
   state: z.enum(["worked", "no_work", "unknown"]),
   workers: z.number().int().positive().optional(),
-  source: text,
+  ...provenance,
   note: text.optional()
 }).refine((record) => record.workers === undefined || record.state === "worked", {
   message: "Worker counts require a worked date"
@@ -57,7 +64,7 @@ const materialSchema = z.object({
   specification: text.optional(),
   quantity: z.number().positive().finite(),
   unit: text,
-  source: text
+  ...provenance
 });
 
 const equipmentSchema = z.object({
@@ -67,12 +74,12 @@ const equipmentSchema = z.object({
   name: text,
   quantity: z.number().positive().finite(),
   unit: text,
-  source: text,
+  ...provenance,
   note: text.optional()
 });
 
 const publicRecordsSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.literal(2),
   publishedAt: day,
   project: z.object({
     paperworkStarted: entryDate,
@@ -110,6 +117,18 @@ const publicRecordsSchema = z.object({
       ids.add(record.id);
       const recordDate = record.date.length === 7 ? `${record.date}-01` : record.date;
       if (recordDate > records.publishedAt) context.addIssue({ code: "custom", message: `${collection} record is dated after publication: ${record.id}` });
+      const sourceDate = record.source.date.length === 7 ? `${record.source.date}-01` : record.source.date;
+      if (sourceDate > records.publishedAt) context.addIssue({ code: "custom", message: `${collection} source is dated after publication: ${record.id}` });
+      let previousCorrectionDate = "";
+      for (const correction of record.corrections ?? []) {
+        if (correction.date > records.publishedAt) {
+          context.addIssue({ code: "custom", message: `${collection} correction is dated after publication: ${record.id}` });
+        }
+        if (correction.date < previousCorrectionDate) {
+          context.addIssue({ code: "custom", message: `${collection} corrections are out of order: ${record.id}` });
+        }
+        previousCorrectionDate = correction.date;
+      }
     }
   }
   const financeIds = new Set(records.finance.map((record) => record.id));
@@ -150,6 +169,7 @@ export type FinanceRecord = PublicRecords["finance"][number];
 export type AttendanceRecord = PublicRecords["attendance"][number];
 export type MaterialRecord = PublicRecords["materials"][number];
 export type EquipmentRecord = PublicRecords["equipment"][number];
+export type PublicSource = z.infer<typeof sourceSchema>;
 
 export const parsedRecords = publicRecordsSchema.safeParse(publicData);
 
@@ -162,6 +182,22 @@ export function formatDate(value: string, format: "short" | "long" = "short"): s
     year: "numeric",
     timeZone: "UTC"
   }).format(date);
+}
+
+const sourceKindLabel: Record<PublicSource["kind"], string> = {
+  owner_report: "Owner report",
+  site_note: "Site note",
+  document: "Document",
+  photo: "Photograph",
+  other: "Other source"
+};
+
+export function sourceTypeLabel(source: PublicSource): string {
+  return sourceKindLabel[source.kind];
+}
+
+export function formatSource(source: PublicSource): string {
+  return `${sourceTypeLabel(source)} · ${formatDate(source.date)}${source.description ? ` · ${source.description}` : ""}`;
 }
 
 const currency = new Intl.NumberFormat("en-IN", {

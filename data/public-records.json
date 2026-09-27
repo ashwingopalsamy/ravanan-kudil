@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "publishedAt": "2026-09-27",
   "project": {
     "paperworkStarted": "2024-12",
@@ -17,14 +17,14 @@
       "date": "2024-12",
       "title": "The paperwork began",
       "body": "The administrative work for the home began in December 2024. Its individual documents and dates have not yet been added to this public record.",
-      "source": "Owner’s account, recorded September 2026"
+      "source": { "kind": "owner_report", "date": "2026-09" }
     },
     {
       "id": "construction-began",
       "date": "2026-03-06",
       "title": "Construction began on site",
       "body": "The physical build started on 6 March 2026. Dated work notes, attendance and costs will appear as their records are reconciled.",
-      "source": "Owner’s account, recorded September 2026"
+      "source": { "kind": "owner_report", "date": "2026-09" }
     }
   ],
   "finance": [],

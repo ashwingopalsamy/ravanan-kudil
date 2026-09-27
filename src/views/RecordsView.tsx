@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Boxes, CalendarDays, ChevronDown, CircleHelp, ClipboardList, HardHat, ReceiptText, Search, Truck } from "lucide-react";
 import { MonthlySpend } from "../components/MonthlySpend";
-import { formatDate, formatMoney, recordedSpend, workSummary, type AttendanceRecord, type EquipmentRecord, type FinanceRecord, type MaterialRecord, type PublicRecords } from "../lib/records";
+import { formatDate, formatMoney, recordedSpend, sourceTypeLabel, workSummary, type AttendanceRecord, type EquipmentRecord, type FinanceRecord, type MaterialRecord, type PublicRecords } from "../lib/records";
 
 type Category = "finance" | "labour" | "materials" | "equipment";
 
@@ -22,24 +22,28 @@ const emptyCopy: Record<Category, { title: string; text: string; note: string }>
 const kindLabel: Record<FinanceRecord["kind"], string> = { quote: "Quotation", invoice: "Bill", payment: "Payment", refund: "Refund" };
 const attendanceLabel: Record<AttendanceRecord["state"], string> = { worked: "Work recorded", no_work: "No work recorded", unknown: "Unconfirmed" };
 
-function DetailLine({ label, value }: { label: string; value: string }) {
-  return <div className="detail-line"><dt>{label}</dt><dd>{value}</dd></div>;
+function DetailLine({ label, value, correction = false }: { label: string; value: ReactNode; correction?: boolean }) {
+  return <div className={`detail-line${correction ? " detail-line--correction" : ""}`}><dt>{label}</dt><dd>{value}</dd></div>;
+}
+
+function ProvenanceLines({ item }: { item: Pick<FinanceRecord, "source" | "corrections"> }) {
+  return <><DetailLine label="Source type" value={sourceTypeLabel(item.source)} /><DetailLine label="Source dated" value={<time dateTime={item.source.date}>{formatDate(item.source.date, "long")}</time>} />{item.source.description && <DetailLine label="Source note" value={item.source.description} />}{item.corrections?.map((correction, index) => <DetailLine key={`${correction.date}-${index}`} label="Correction" correction value={<><time dateTime={correction.date}>{formatDate(correction.date, "long")}</time> · {correction.note}</>} />)}</>;
 }
 
 function FinanceRow({ item }: { item: FinanceRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><ReceiptText size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.description}</strong><small>{kindLabel[item.kind]} · {item.category}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{formatMoney(item.kind === "refund" ? -item.amountPaise : item.amountPaise)}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Type" value={kindLabel[item.kind]} /><DetailLine label="Category" value={item.category} /><DetailLine label="Source" value={item.source} /><DetailLine label="Spend total" value={item.kind === "payment" || item.kind === "refund" ? "Included" : "Not included"} />{item.relatedId && <DetailLine label="Related record" value={item.relatedId} />}{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><ReceiptText size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.description}</strong><small>{kindLabel[item.kind]} · {item.category}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{formatMoney(item.kind === "refund" ? -item.amountPaise : item.amountPaise)}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Type" value={kindLabel[item.kind]} /><DetailLine label="Category" value={item.category} /><ProvenanceLines item={item} /><DetailLine label="Spend total" value={item.kind === "payment" || item.kind === "refund" ? "Included" : "Not included"} />{item.relatedId && <DetailLine label="Related record" value={item.relatedId} />}{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
 }
 
 function LabourRow({ item }: { item: AttendanceRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><CalendarDays size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{attendanceLabel[item.state]}</strong><small>{item.note ?? "Attendance record"}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.state === "worked" && item.workers ? `${item.workers} ${item.workers === 1 ? "worker" : "workers"}` : "—"}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Attendance" value={attendanceLabel[item.state]} /><DetailLine label="Source" value={item.source} />{item.note && <DetailLine label="Work noted" value={item.note} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><CalendarDays size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{attendanceLabel[item.state]}</strong><small>{item.note ?? "Attendance record"}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.state === "worked" && item.workers ? `${item.workers} ${item.workers === 1 ? "worker" : "workers"}` : "—"}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Attendance" value={attendanceLabel[item.state]} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Work noted" value={item.note} />}</dl></details>;
 }
 
 function MaterialRow({ item }: { item: MaterialRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><Boxes size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.specification ? `${item.specification} · ` : ""}{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><DetailLine label="Source" value={item.source} />{item.specification && <DetailLine label="Specification" value={item.specification} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><Boxes size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.specification ? `${item.specification} · ` : ""}{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><ProvenanceLines item={item} />{item.specification && <DetailLine label="Specification" value={item.specification} />}</dl></details>;
 }
 
 function EquipmentRow({ item }: { item: EquipmentRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><DetailLine label="Source" value={item.source} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
 }
 
 export function RecordsView({ records }: { records: PublicRecords }) {
