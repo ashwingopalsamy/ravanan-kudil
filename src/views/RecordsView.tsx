@@ -66,6 +66,7 @@ export function RecordsView({ records }: { records: PublicRecords }) {
   const [search, setSearch] = useState("");
   const EmptyCategoryIcon = categories.find(({ id }) => id === category)!.icon;
   const counts: Record<Category, number> = { finance: records.finance.length, labour: records.attendance.length, materials: records.materials.length, equipment: records.equipment.length };
+  const itemCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
   const spent = recordedSpend(records);
   const work = workSummary(records);
   const filtered = useMemo(() => {
@@ -75,7 +76,7 @@ export function RecordsView({ records }: { records: PublicRecords }) {
   }, [category, records, search]);
 
   return <>
-    <header className="view-intro"><div className="eyebrow"><span className="eyebrow-mark" /> The evidence / Public record</div><div className="view-intro-line"><div><h1>Every figure has a source.</h1><p>Money, labour, materials and equipment are recorded as separate dated events. Totals only use the entries that support them.</p></div><span className="count-pill">{Object.values(counts).reduce((sum, count) => sum + count, 0)} itemised records</span></div></header>
+    <header className="view-intro"><div className="eyebrow"><span className="eyebrow-mark" /> The evidence / Public record</div><div className="view-intro-line"><div><h1>Every figure has a source.</h1><p>Money, labour, materials and equipment are recorded as separate dated events. Totals only use the entries that support them.</p></div>{itemCount > 0 && <span className="count-pill">{itemCount} itemised {itemCount === 1 ? "record" : "records"}</span>}</div>{itemCount === 0 && <div className="records-empty-status"><span className="state-label">0 itemised records</span><span>No itemised entries published yet. Select a record type to see what will be counted.</span></div>}</header>
     <div className="record-metrics" aria-label="Recorded measures"><div><span>Recorded spend</span><strong className="tabular-nums">{spent === null ? "Not recorded" : formatMoney(spent)}</strong><small>Payments less refunds</small></div><div><span>Dates with work</span><strong className="tabular-nums">{work.workdays === null ? "Not recorded" : work.workdays}</strong><small>Confirmed attendance dates</small></div><div><span>Worker-days</span><strong className="tabular-nums">{work.workerDays === null ? "Not recorded" : `${work.incomplete ? "At least " : ""}${work.workerDays}`}</strong><small>Sum of known daily headcounts</small></div></div>
     <section className="records-surface" aria-labelledby="register-title"><div className="records-header"><div><span className="overline">Itemised source data</span><h2 id="register-title">Record register</h2></div><span className="records-header-note"><ClipboardList size={16} aria-hidden="true" /> Public entries only</span></div>
       <div className="category-tabs" role="group" aria-label="Record type">{categories.map(({ id, label, icon: Icon }) => <button className="category-tab" type="button" key={id} aria-pressed={category === id} onClick={() => { setCategory(id); setSearch(""); }}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span><small>{counts[id]}</small></button>)}</div>
