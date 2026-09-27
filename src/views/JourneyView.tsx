@@ -15,7 +15,10 @@ function groupByYear(entries: JournalEntry[]): [string, JournalEntry[]][] {
 export function JourneyView({ records, selectedEntryId }: { records: PublicRecords; selectedEntryId?: string }) {
   const entries = sortedEntries(records);
   useEffect(() => {
-    if (selectedEntryId) document.getElementById(`journal-${selectedEntryId}`)?.scrollIntoView({ block: "start" });
+    if (!selectedEntryId) return;
+    const entry = document.getElementById(`journal-${selectedEntryId}`);
+    entry?.scrollIntoView({ block: "start" });
+    entry?.querySelector<HTMLElement>("summary")?.focus({ preventScroll: true });
   }, [selectedEntryId]);
   return (
     <>

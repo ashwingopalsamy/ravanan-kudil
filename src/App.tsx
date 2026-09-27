@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BookOpenText, ChevronLeft, ChevronRight, House, Layers3, PanelLeftClose, PanelLeftOpen, ReceiptText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -29,6 +29,15 @@ function readCompactPreference(): boolean {
   catch { return false; }
 }
 
+function FocusOnRoute({ route, navigated }: { route: Route; navigated: boolean }) {
+  useEffect(() => {
+    const current = currentRoute();
+    if (!navigated || route.entryId || current.view !== route.view || current.entryId !== route.entryId) return;
+    document.getElementById("content")?.focus({ preventScroll: true });
+  }, [navigated, route.view, route.entryId]);
+  return null;
+}
+
 function NavigationLinks({ view, mobile = false }: { view: View; mobile?: boolean }) {
   return (
     <nav className={mobile ? "mobile-navigation" : "rail-navigation"} aria-label={mobile ? "Mobile sections" : "Sections"}>
@@ -45,11 +54,13 @@ function NavigationLinks({ view, mobile = false }: { view: View; mobile?: boolea
 function AppShell({ records }: { records: PublicRecords }) {
   const [route, setRoute] = useState<Route>(currentRoute);
   const [compact, setCompact] = useState(readCompactPreference);
+  const navigated = useRef(false);
   const reducedMotion = useReducedMotion();
   const { view } = route;
 
   useEffect(() => {
     const update = () => {
+      navigated.current = true;
       setRoute(currentRoute());
       window.scrollTo(0, 0);
     };
@@ -96,7 +107,7 @@ function AppShell({ records }: { records: PublicRecords }) {
           <span className="topbar-updated"><span>Record updated </span>{formatDate(records.publishedAt)}</span>
         </header>
 
-        <main className="main-content" id="content" tabIndex={-1}>
+        <main className="main-content" id="content" tabIndex={-1} aria-label={`${navigation.find((item) => item.id === view)?.label} content`}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               className="view-frame"
@@ -106,6 +117,7 @@ function AppShell({ records }: { records: PublicRecords }) {
               exit={reducedMotion ? undefined : { opacity: 0, y: -5 }}
               transition={{ duration: reducedMotion ? 0 : 0.2, ease: "easeOut" }}
             >
+              <FocusOnRoute route={route} navigated={navigated.current} />
               {content}
             </motion.div>
           </AnimatePresence>
