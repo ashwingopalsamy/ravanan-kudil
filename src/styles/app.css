@@ -194,6 +194,10 @@
 .chronology-card { grid-area: chronology; }
 .chronology-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 0.625rem 1rem; }
 .chronology-card .card-heading h2 { font-size: 1.375rem; }
+.chronology-elapsed { display: flex; align-items: center; gap: 0.875rem; margin-block-start: 1.25rem; padding: 0.875rem 0; border-block: 1px solid var(--color-line); }
+.chronology-elapsed strong { flex: none; color: var(--color-ink); font-size: 1.625rem; font-weight: 640; letter-spacing: -0.035em; line-height: 1; }
+.chronology-elapsed span { color: var(--color-ink-secondary); font-size: 0.8125rem; line-height: 1.45; }
+.chronology-elapsed small { display: block; margin-block-start: 0.125rem; color: var(--color-ink-muted); font-size: 0.75rem; line-height: 1.4; }
 .chronology-footer { display: flex; padding-block-start: 1rem; border-block-start: 1px solid var(--color-line); }
 .latest-entry-card { margin-block-start: 1.125rem; }
 .journal-preview-list { margin-block-start: 1rem; }
@@ -216,8 +220,6 @@
 .journal-copy h3 { font-size: 0.9375rem; font-weight: 580; letter-spacing: -0.015em; }
 .journal-copy p { max-width: 65ch; margin-block-start: 0.25rem; color: var(--color-ink-secondary); font-size: 0.875rem; line-height: 1.5; }
 .source-line { display: block; margin-block-start: 0.5rem; color: var(--color-ink-muted); font-size: 0.75rem; line-height: 1.4; }
-.journal-elapsed { display: block; margin-block-start: 0.75rem; color: var(--color-ink-secondary); font-size: 0.8125rem; line-height: 1.5; }
-.journal-elapsed strong { color: var(--color-ink); font-weight: 600; }
 .journal-arrow { margin-block-start: 0.125rem; color: #a3a3a3; }
 .overview-context { grid-area: context; display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 1.125rem; }
 .context-card { padding: 1.375rem; }

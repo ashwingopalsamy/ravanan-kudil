@@ -23,7 +23,8 @@ export function OverviewView({ records }: { records: PublicRecords }) {
         </section>
         <section className="surface-card chronology-card" aria-labelledby="chronology-title">
           <div className="card-heading"><div><div className="chronology-kicker"><span className="overline">The journal</span><span className="status-pill status-pill--active"><span className="status-pulse" /> Under construction</span></div><h2 id="chronology-title">From paperwork to site work</h2><p>Owner-reported milestones.</p></div></div>
-          <JournalPreview entries={milestoneEntries} previewTextById={{ "paperwork-began": "Its individual documents and dates have not yet been added to this public record.", "construction-began": "Dated work notes, attendance and costs will appear as their records are reconciled." }} siteWorkElapsed={{ days: daysElapsed, asOf: records.publishedAt }} />
+          <div className="chronology-elapsed"><strong className="tabular-nums">{daysElapsed}</strong><span>calendar days since site work began<small>As of {formatDate(records.publishedAt, "long")} · not days worked</small></span></div>
+          <JournalPreview entries={milestoneEntries} previewTextById={{ "paperwork-began": "Its individual documents and dates have not yet been added to this public record.", "construction-began": "Dated work notes, attendance and costs will appear as their records are reconciled." }} />
           <div className="chronology-footer"><a className="button button--primary" href="#journey">Read the full journey <ArrowUpRight size={17} aria-hidden="true" /></a></div>
         </section>
         <aside className="overview-context" aria-label="Home context">
