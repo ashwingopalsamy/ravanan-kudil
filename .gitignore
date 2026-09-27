@@ -3,3 +3,5 @@
 /.sites-runtime/
 /AGENTS.md
 /PRODUCT_BRIEF.md
+/node_modules/
+/build/
