@@ -22,6 +22,7 @@ const emptyCopy: Record<Category, { title: string; text: string; note: string }>
 
 const kindLabel: Record<FinanceRecord["kind"], string> = { quote: "Quotation", invoice: "Bill", payment: "Payment", refund: "Refund" };
 const attendanceLabel: Record<AttendanceRecord["state"], string> = { worked: "Work recorded", no_work: "No work recorded", unknown: "Unconfirmed" };
+const eventActionLabel: Record<MaterialRecord["action"] | EquipmentRecord["action"], string> = { purchased: "Purchased", delivered: "Delivered", used: "Used", returned: "Returned", hired: "Hired" };
 
 function DetailLine({ label, value, correction = false }: { label: string; value: ReactNode; correction?: boolean }) {
   return <div className={`detail-line${correction ? " detail-line--correction" : ""}`}><dt>{label}</dt><dd>{value}</dd></div>;
@@ -40,11 +41,11 @@ function LabourRow({ item }: { item: AttendanceRecord }) {
 }
 
 function MaterialRow({ item }: { item: MaterialRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><Boxes size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.specification ? `${item.specification} · ` : ""}{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><ProvenanceLines item={item} />{item.specification && <DetailLine label="Specification" value={item.specification} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><Boxes size={19} aria-hidden="true" /></span><span className="data-row-main"><span className="data-row-title"><strong>{item.name}</strong><span className="event-action">{eventActionLabel[item.action]}</span></span>{item.specification && <small>{item.specification}</small>}</span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value"><span className="tabular-nums">{item.quantity}</span>{" "}<span className="data-row-unit">{item.unit}</span></strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={eventActionLabel[item.action]} /><ProvenanceLines item={item} />{item.specification && <DetailLine label="Specification" value={item.specification} />}</dl></details>;
 }
 
 function EquipmentRow({ item }: { item: EquipmentRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><span className="data-row-title"><strong>{item.name}</strong><span className="event-action">{eventActionLabel[item.action]}</span></span></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value"><span className="tabular-nums">{item.quantity}</span>{" "}<span className="data-row-unit">{item.unit}</span></strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={eventActionLabel[item.action]} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
 }
 
 function searchableText(item: FinanceRecord | AttendanceRecord | MaterialRecord | EquipmentRecord): string {
