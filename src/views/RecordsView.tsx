@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { Boxes, CalendarDays, ChevronDown, CircleHelp, ClipboardList, HardHat, ReceiptText, Search, Truck } from "lucide-react";
+import { Boxes, CalendarDays, ChevronDown, ClipboardList, HardHat, ReceiptText, Search, Truck } from "lucide-react";
 import { MonthlySpend } from "../components/MonthlySpend";
 import { formatDate, formatMoney, recordedSpend, sourceTypeLabel, workSummary, type AttendanceRecord, type EquipmentRecord, type FinanceRecord, type MaterialRecord, type PublicRecords } from "../lib/records";
 
@@ -46,16 +46,30 @@ function EquipmentRow({ item }: { item: EquipmentRecord }) {
   return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{item.action}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value tabular-nums">{item.quantity} {item.unit}</strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={item.action} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
 }
 
+function searchableText(item: FinanceRecord | AttendanceRecord | MaterialRecord | EquipmentRecord): string {
+  return [
+    ...Object.values(item).filter((value) => typeof value === "string" || typeof value === "number"),
+    formatDate(item.date),
+    sourceTypeLabel(item.source),
+    item.source.date,
+    formatDate(item.source.date),
+    item.source.description,
+    ...(item.corrections ?? []).flatMap((correction) => [correction.date, formatDate(correction.date), correction.note]),
+    "kind" in item ? kindLabel[item.kind] : undefined
+  ].filter((value) => value !== undefined).join(" ").toLocaleLowerCase();
+}
+
 export function RecordsView({ records }: { records: PublicRecords }) {
   const [category, setCategory] = useState<Category>("finance");
   const [search, setSearch] = useState("");
+  const EmptyCategoryIcon = categories.find(({ id }) => id === category)!.icon;
   const counts: Record<Category, number> = { finance: records.finance.length, labour: records.attendance.length, materials: records.materials.length, equipment: records.equipment.length };
   const spent = recordedSpend(records);
   const work = workSummary(records);
   const filtered = useMemo(() => {
     const data = { finance: records.finance, labour: records.attendance, materials: records.materials, equipment: records.equipment }[category];
     const query = search.trim().toLocaleLowerCase();
-    return [...data].filter((item) => !query || Object.values(item).some((value) => String(value).toLocaleLowerCase().includes(query))).sort((a, b) => b.date.localeCompare(a.date));
+    return [...data].filter((item) => !query || searchableText(item).includes(query)).sort((a, b) => b.date.localeCompare(a.date));
   }, [category, records, search]);
 
   return <>
@@ -69,7 +83,7 @@ export function RecordsView({ records }: { records: PublicRecords }) {
         if (category === "labour") return <LabourRow key={item.id} item={item as AttendanceRecord} />;
         if (category === "materials") return <MaterialRow key={item.id} item={item as MaterialRecord} />;
         return <EquipmentRow key={item.id} item={item as EquipmentRecord} />;
-      }) : counts[category] ? <div className="empty-record empty-record--search"><Search size={24} strokeWidth={1.6} aria-hidden="true" /><h3>No matching records.</h3><p>Try a different search term.</p></div> : <div className="empty-record"><span className="empty-record-icon"><CircleHelp size={21} strokeWidth={1.7} aria-hidden="true" /></span><div className="empty-record-copy"><h3>{emptyCopy[category].title}</h3><p>{emptyCopy[category].text}</p></div><div className="empty-record-rule"><span className="overline">How this is counted</span><p>{emptyCopy[category].note}</p></div></div>}</div>
+      }) : counts[category] ? <div className="empty-record empty-record--search"><Search size={24} strokeWidth={1.6} aria-hidden="true" /><h3>No matching records.</h3><p>Try a different search term.</p></div> : <div className="empty-record"><span className="empty-record-icon"><EmptyCategoryIcon size={21} strokeWidth={1.7} aria-hidden="true" /></span><div className="empty-record-copy"><h3>{emptyCopy[category].title}</h3><p>{emptyCopy[category].text}</p></div><div className="empty-record-rule"><span className="overline">How this is counted</span><p>{emptyCopy[category].note}</p></div></div>}</div>
     </section>
     {category === "finance" && <MonthlySpend records={records} />}
     {counts[category] > 0 && <section className="record-method" aria-label="How the record is counted"><div><span className="overline">Calculation notes</span><h2>Measured, not inferred.</h2></div><div><p><strong>Spending</strong> includes payments and refunds only. Bills and quotations stay visible without being counted twice.</p><p><strong>Workdays</strong> and <strong>worker-days</strong> use attendance dates, never payment dates. Unlisted dates stay unknown.</p><p><strong>Material and equipment events</strong> retain their units and actions. A purchase is not proof of delivery or use.</p></div></section>}
