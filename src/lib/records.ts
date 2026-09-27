@@ -17,15 +17,15 @@ const text = z.string().trim().min(1);
 const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/);
 const safeAmount = z.number().int().nonnegative().refine(Number.isSafeInteger, "Amount exceeds safe integer range");
 const estimatedArea = z.number().int().positive().refine(Number.isSafeInteger, "Area exceeds safe integer range");
-const sourceSchema = z.object({
+const sourceSchema = z.strictObject({
   kind: z.enum(["owner_report", "site_note", "document", "photo", "other"]),
   date: entryDate,
   description: text.optional()
 });
-const correctionSchema = z.object({ date: day, note: text });
+const correctionSchema = z.strictObject({ date: day, note: text });
 const provenance = { source: sourceSchema, corrections: z.array(correctionSchema).optional() };
 
-const entrySchema = z.object({
+const entrySchema = z.strictObject({
   id,
   date: entryDate,
   title: text,
@@ -33,7 +33,7 @@ const entrySchema = z.object({
   ...provenance
 });
 
-const financeSchema = z.object({
+const financeSchema = z.strictObject({
   id,
   date: day,
   kind: z.enum(["quote", "invoice", "payment", "refund"]),
@@ -45,7 +45,7 @@ const financeSchema = z.object({
   relatedId: id.optional()
 });
 
-const attendanceSchema = z.object({
+const attendanceSchema = z.strictObject({
   id,
   date: day,
   state: z.enum(["worked", "no_work", "unknown"]),
@@ -56,7 +56,7 @@ const attendanceSchema = z.object({
   message: "Worker counts require a worked date"
 });
 
-const materialSchema = z.object({
+const materialSchema = z.strictObject({
   id,
   date: day,
   action: z.enum(["purchased", "delivered", "used", "returned"]),
@@ -67,7 +67,7 @@ const materialSchema = z.object({
   ...provenance
 });
 
-const equipmentSchema = z.object({
+const equipmentSchema = z.strictObject({
   id,
   date: day,
   action: z.enum(["hired", "used", "returned"]),
@@ -78,13 +78,13 @@ const equipmentSchema = z.object({
   note: text.optional()
 });
 
-const publicRecordsSchema = z.object({
+const publicRecordsSchema = z.strictObject({
   schemaVersion: z.literal(2),
   publishedAt: day,
-  project: z.object({
+  project: z.strictObject({
     paperworkStarted: entryDate,
     constructionStarted: day,
-    areasSqFt: z.object({
+    areasSqFt: z.strictObject({
       groundFloor: estimatedArea,
       firstFloor: estimatedArea,
       porchMin: estimatedArea,
