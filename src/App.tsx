@@ -42,7 +42,7 @@ function NavigationLinks({ view, mobile = false }: { view: View; mobile?: boolea
   return (
     <nav className={mobile ? "mobile-navigation" : "rail-navigation"} aria-label={mobile ? "Mobile sections" : "Sections"}>
       {navigation.map(({ id, label, icon: Icon }) => (
-        <a className="navigation-link" href={`#${id}`} key={id} aria-current={view === id ? "page" : undefined} title={mobile ? undefined : label} onClick={() => window.scrollTo(0, 0)}>
+        <a className="navigation-link" href={`#${id}`} key={id} aria-label={label} aria-current={view === id ? "page" : undefined} title={mobile ? undefined : label} onClick={() => window.scrollTo(0, 0)}>
           <Icon aria-hidden="true" size={20} strokeWidth={1.8} />
           <span>{label}</span>
         </a>
@@ -103,7 +103,7 @@ function AppShell({ records }: { records: PublicRecords }) {
 
       <div className="app-main">
         <header className="topbar">
-          <div className="topbar-identity"><span className="mobile-brand-mark">RK</span><span>Ravanan Kudil</span><ChevronRight aria-hidden="true" size={14} /><strong>{navigation.find((item) => item.id === view)?.label}</strong></div>
+          <div className="topbar-identity"><span className="mobile-brand-mark" aria-hidden="true">RK</span><span>Ravanan Kudil</span><ChevronRight aria-hidden="true" size={14} /><strong>{navigation.find((item) => item.id === view)?.label}</strong></div>
           <span className="topbar-updated"><span>Record updated </span>{formatDate(records.publishedAt)}</span>
         </header>
 
