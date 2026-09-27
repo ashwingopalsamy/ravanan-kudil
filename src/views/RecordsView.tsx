@@ -13,10 +13,10 @@ const categories: { id: Category; label: string; icon: typeof ReceiptText }[] = 
 ];
 
 const emptyCopy: Record<Category, { title: string; text: string; note: string }> = {
-  finance: { title: "Financial records are being reconciled.", text: "No quotations, bills, payments or refunds have been published yet.", note: "A quotation does not become spending. The spend total starts with documented payments and subtracts documented refunds." },
-  labour: { title: "Attendance records are being reconciled.", text: "No dated worker attendance has been published yet.", note: "An unrecorded date is unknown. A date with confirmed work and two workers counts as one workday and two worker-days." },
-  materials: { title: "Material records are being reconciled.", text: "No material quantities have been published yet.", note: "Purchase, delivery and use are separate events. A supplier mention never establishes a quantity." },
-  equipment: { title: "Equipment records are being reconciled.", text: "No JCB, tractor or other equipment events have been published yet.", note: "Equipment events keep their own date, action, quantity and unit, such as days or trips." }
+  finance: { title: "No financial entries have been published.", text: "The register will separate quotations, bills, payments and refunds when their dates and amounts are established.", note: "A quotation does not become spending. The spend total starts with documented payments and subtracts documented refunds." },
+  labour: { title: "No attendance dates have been published.", text: "Workday and worker counts will appear here when dated attendance is established.", note: "An unrecorded date is unknown. A date with confirmed work and two workers counts as one workday and two worker-days." },
+  materials: { title: "No material quantities have been published.", text: "Purchases, deliveries and use will appear here as separate dated events with their units.", note: "Purchase, delivery and use are separate events. A supplier mention never establishes a quantity." },
+  equipment: { title: "No equipment events have been published.", text: "JCB, tractor and other equipment entries will appear here when their dates and units are established.", note: "Equipment events keep their own date, action, quantity and unit, such as days or trips." }
 };
 
 const kindLabel: Record<FinanceRecord["kind"], string> = { quote: "Quotation", invoice: "Bill", payment: "Payment", refund: "Refund" };

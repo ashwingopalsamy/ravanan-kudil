@@ -112,7 +112,7 @@ h6 {
 
 h1 {
   font-size: var(--text-display);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
   line-height: var(--leading-tight);
 }
 
