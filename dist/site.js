@@ -89,6 +89,7 @@ function replaceWithNote(id, message) {
 
 function renderJournal(entries) {
   const list = document.getElementById("journal-list");
+  document.getElementById("journal-count").textContent = `${entries.length} dated ${entries.length === 1 ? "entry" : "entries"}`;
   if (!entries.length) return replaceWithNote("journal-list", "No dated notes published yet.");
   const items = entries.slice().sort((a, b) => b.date.localeCompare(a.date)).map((entry) => {
     const article = element("article", "journal-entry");
@@ -231,11 +232,20 @@ function detailLine(label, value) {
 
 function showRecordError() {
   const message = "The public records need correction before figures can be shown.";
+  document.getElementById("journal-count").textContent = "Unavailable";
   for (const id of ["journal-list", "spending-chart", "attendance-list", "materials-list", "ledger-list"]) replaceWithNote(id, message);
   for (const id of ["spent-value", "workday-value", "workerday-value"]) {
     const value = document.getElementById(id);
     value.textContent = "Unavailable";
     value.classList.add("is-unknown");
+  }
+}
+
+function updateNavigation() {
+  const selected = ["#journal", "#numbers", "#ledger", "#method"].includes(location.hash) ? location.hash : "#journal";
+  for (const link of document.querySelectorAll(".nav-link")) {
+    if (link.getAttribute("href") === selected) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
   }
 }
 
@@ -258,4 +268,6 @@ async function loadRecords() {
   }
 }
 
+addEventListener("hashchange", updateNavigation);
+updateNavigation();
 loadRecords();
