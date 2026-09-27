@@ -507,6 +507,11 @@
   .privacy-surface .button { align-self: flex-start; }
 }
 
+@media (max-width: 24rem) {
+  .records-header { flex-direction: column; gap: 0.5rem; }
+  .records-header-note { max-width: none; justify-content: flex-start; font-size: 0.75rem; text-align: start; }
+}
+
 @media (max-width: 22rem) {
   .topbar { gap: 0.5rem; padding-inline: 1rem; }
   .topbar-identity { gap: 0.375rem; }
