@@ -9,6 +9,7 @@ import { OverviewView } from "./views/OverviewView";
 import { RecordsView } from "./views/RecordsView";
 
 type View = "overview" | "journey" | "records" | "home";
+type Route = { view: View; entryId?: string };
 
 const navigation: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "overview", label: "Overview", icon: Layers3 },
@@ -17,9 +18,10 @@ const navigation: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "home", label: "The home", icon: House }
 ];
 
-function currentView(): View {
-  const hash = window.location.hash.slice(1);
-  return navigation.some((item) => item.id === hash) ? hash as View : "overview";
+function currentRoute(): Route {
+  const [view, entryId] = window.location.hash.slice(1).split("/");
+  if (!navigation.some((item) => item.id === view)) return { view: "overview" };
+  return { view: view as View, entryId: view === "journey" ? entryId : undefined };
 }
 
 function readCompactPreference(): boolean {
@@ -41,13 +43,14 @@ function NavigationLinks({ view, mobile = false }: { view: View; mobile?: boolea
 }
 
 function AppShell({ records }: { records: PublicRecords }) {
-  const [view, setView] = useState<View>(currentView);
+  const [route, setRoute] = useState<Route>(currentRoute);
   const [compact, setCompact] = useState(readCompactPreference);
   const reducedMotion = useReducedMotion();
+  const { view } = route;
 
   useEffect(() => {
     const update = () => {
-      setView(currentView());
+      setRoute(currentRoute());
       window.scrollTo(0, 0);
     };
     window.addEventListener("hashchange", update);
@@ -61,7 +64,7 @@ function AppShell({ records }: { records: PublicRecords }) {
 
   const content = {
     overview: <OverviewView records={records} />,
-    journey: <JourneyView records={records} />,
+    journey: <JourneyView records={records} selectedEntryId={route.entryId} />,
     records: <RecordsView records={records} />,
     home: <HomeView records={records} />
   }[view];

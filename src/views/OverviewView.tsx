@@ -16,11 +16,11 @@ export function OverviewView({ records }: { records: PublicRecords }) {
           <p>An owner-managed home taking shape on its owner’s farmland. This is the public record of the work, the people and the spending, as the evidence is brought together.</p>
           <div className="hero-actions"><a className="button button--primary" href="#journey">Explore the journey <ArrowUpRight size={17} aria-hidden="true" /></a><a className="button button--quiet" href="#records">View records <ArrowRight size={17} aria-hidden="true" /></a></div>
         </div>
-        <div className="hero-history" aria-label="Project dates">
+        <div className="hero-history" aria-label="Project status and dates">
           <div className="hero-history-header"><span className="overline">Project status</span><span className="status-pill status-pill--active"><span className="status-pulse" /> Under construction</span></div>
           <div className="history-step"><span className="history-step-icon"><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><span>Paperwork began</span><strong>{formatDate(project.paperworkStarted, "long")}</strong></div><Check size={17} strokeWidth={1.9} aria-hidden="true" /></div>
           <div className="history-step"><span className="history-step-icon"><HardHat size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><span>Physical build began</span><strong>{formatDate(project.constructionStarted, "long")}</strong></div><span className="history-step-current" aria-hidden="true" /></div>
-          <div className="history-elapsed"><strong className="tabular-nums">{daysElapsed}</strong><div><span>Calendar days elapsed</span><small>To {formatDate(records.publishedAt)} · not days worked</small></div></div>
+          <div className="history-elapsed"><strong className="tabular-nums">{daysElapsed}</strong><div><span>Calendar days since site work began</span><small>To {formatDate(records.publishedAt)} · not days worked</small></div></div>
           <p>Dates reported by the owner. Detailed records are added when confirmed.</p>
         </div>
       </section>
@@ -36,7 +36,34 @@ export function OverviewView({ records }: { records: PublicRecords }) {
         </aside>
       </div>
 
-      <section className="coverage-section" aria-labelledby="coverage-title"><div className="section-line"><div><span className="overline">At this point</span><h2 id="coverage-title">What the record can show</h2></div><span className="section-line-meta">Updated {formatDate(records.publishedAt)}</span></div><div className="coverage-list"><div className="coverage-item"><ReceiptText size={19} strokeWidth={1.7} aria-hidden="true" /><div><h3>Spending</h3><p>Payments and refunds, separate from quotes and bills.</p></div><span className="state-label">{recordedTransactions ? `${recordedTransactions} ${recordedTransactions === 1 ? "transaction" : "transactions"}` : "Awaiting records"}</span></div><div className="coverage-item"><HardHat size={19} strokeWidth={1.7} aria-hidden="true" /><div><h3>Labour</h3><p>Confirmed work dates and worker-days.</p></div><span className="state-label">{records.attendance.length ? `${records.attendance.length} ${records.attendance.length === 1 ? "date" : "dates"}` : "Awaiting records"}</span></div><div className="coverage-item"><Ruler size={19} strokeWidth={1.7} aria-hidden="true" /><div><h3>Materials</h3><p>Purchases, deliveries and use, each with its own unit.</p></div><span className="state-label">{records.materials.length ? `${records.materials.length} ${records.materials.length === 1 ? "entry" : "entries"}` : "Awaiting records"}</span></div><div className="coverage-item"><Truck size={19} strokeWidth={1.7} aria-hidden="true" /><div><h3>Equipment</h3><p>Hires and use, with days and trips kept separate.</p></div><span className="state-label">{records.equipment.length ? `${records.equipment.length} ${records.equipment.length === 1 ? "entry" : "entries"}` : "Awaiting records"}</span></div></div></section>
+      <section className="coverage-section" aria-labelledby="coverage-title">
+        <div className="section-line">
+          <div><span className="overline">At this point</span><h2 id="coverage-title">What the record can show</h2></div>
+          <span className="section-line-meta">Updated {formatDate(records.publishedAt)}</span>
+        </div>
+        <ul className="coverage-list">
+          <li className="coverage-item">
+            <ReceiptText size={19} strokeWidth={1.7} aria-hidden="true" />
+            <div className="coverage-item-copy"><h3>Spending</h3><p>Payments and refunds, separate from quotes and bills.</p></div>
+            <span className="state-label">{recordedTransactions ? `${recordedTransactions} ${recordedTransactions === 1 ? "transaction" : "transactions"}` : "Awaiting records"}</span>
+          </li>
+          <li className="coverage-item">
+            <HardHat size={19} strokeWidth={1.7} aria-hidden="true" />
+            <div className="coverage-item-copy"><h3>Labour</h3><p>Confirmed work dates and worker-days.</p></div>
+            <span className="state-label">{records.attendance.length ? `${records.attendance.length} ${records.attendance.length === 1 ? "date" : "dates"}` : "Awaiting records"}</span>
+          </li>
+          <li className="coverage-item">
+            <Ruler size={19} strokeWidth={1.7} aria-hidden="true" />
+            <div className="coverage-item-copy"><h3>Materials</h3><p>Purchases, deliveries and use, each with its own unit.</p></div>
+            <span className="state-label">{records.materials.length ? `${records.materials.length} ${records.materials.length === 1 ? "entry" : "entries"}` : "Awaiting records"}</span>
+          </li>
+          <li className="coverage-item">
+            <Truck size={19} strokeWidth={1.7} aria-hidden="true" />
+            <div className="coverage-item-copy"><h3>Equipment</h3><p>Hires and use, with days and trips kept separate.</p></div>
+            <span className="state-label">{records.equipment.length ? `${records.equipment.length} ${records.equipment.length === 1 ? "entry" : "entries"}` : "Awaiting records"}</span>
+          </li>
+        </ul>
+      </section>
     </>
   );
 }
