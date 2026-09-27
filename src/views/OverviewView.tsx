@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, CalendarDays, Check, CircleHelp, HardHat, ReceiptText, Ruler, Truck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CircleHelp, HardHat, ReceiptText, Ruler, Truck } from "lucide-react";
 import { JournalPreview } from "../components/Journal";
 import { elapsedCalendarDays, formatArea, formatDate, sortedEntries, type PublicRecords } from "../lib/records";
 
@@ -16,12 +16,9 @@ export function OverviewView({ records }: { records: PublicRecords }) {
           <p>An owner-managed home taking shape on its owner’s farmland. This is the public record of the work, the people and the spending, as the evidence is brought together.</p>
           <div className="hero-actions"><a className="button button--primary" href="#journey">Explore the journey <ArrowUpRight size={17} aria-hidden="true" /></a><a className="button button--quiet" href="#records">View records <ArrowRight size={17} aria-hidden="true" /></a></div>
         </div>
-        <div className="hero-history" aria-label="Project status and dates">
+        <div className="hero-history" aria-label="Project status and elapsed calendar days">
           <div className="hero-history-header"><span className="overline">Project status</span><span className="status-pill status-pill--active"><span className="status-pulse" /> Under construction</span></div>
-          <div className="history-step"><span className="history-step-icon"><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><span>Paperwork began</span><strong>{formatDate(project.paperworkStarted, "long")}</strong></div><Check size={17} strokeWidth={1.9} aria-hidden="true" /></div>
-          <div className="history-step"><span className="history-step-icon"><HardHat size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><span>Physical build began</span><strong>{formatDate(project.constructionStarted, "long")}</strong></div><span className="history-step-current" aria-hidden="true" /></div>
-          <div className="history-elapsed"><strong className="tabular-nums">{daysElapsed}</strong><div><span>Calendar days since site work began</span><small>To {formatDate(records.publishedAt)} · not days worked</small></div></div>
-          <p>Dates reported by the owner. Detailed records are added when confirmed.</p>
+          <div className="history-elapsed"><strong className="tabular-nums">{daysElapsed}</strong><div><span>Calendar days since site work began</span><small>As of {formatDate(records.publishedAt)} · not days worked</small></div></div>
         </div>
       </section>
 
