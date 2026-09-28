@@ -1,14 +1,39 @@
-import { ArrowRight, LockKeyhole, Ruler } from "lucide-react";
-import { formatArea, type PublicRecords } from "../lib/records";
+import type { DataMode } from "../components/DataModeControl";
+import { formatArea, formatDate, type PublicRecords } from "../lib/records";
 
-export function HomeView({ records }: { records: PublicRecords }) {
+export function HomeView({ records, mode }: { records: PublicRecords; mode: DataMode }) {
   const { groundFloor, firstFloor, porchMin, porchMax } = records.project.areasSqFt;
-  const scale = Math.max(groundFloor, firstFloor, porchMax);
-  const percentage = (area: number) => `${(area / scale) * 100}%`;
+  const { lintelHeightApproxFeet, brickworkHeightApproxFeet, asOf, groundFloorRoof } = records.currentStatus;
+  const roofCast = groundFloorRoof === "cast";
+  const areaWidth = (value: number) => `${Math.min(value / groundFloor, 1) * 100}%`;
+  const lintelMark = `${Math.min(lintelHeightApproxFeet / brickworkHeightApproxFeet, 1) * 100}%`;
+
   return <>
-    <header className="view-intro"><div className="view-intro-line"><div><h1>Home profile</h1><p>A contemporary home in Tamil Nadu, built with RCC, steel and red brick. Approximate areas are published without exposing working plans.</p></div></div></header>
-    <div className="home-layout"><section className="surface-card area-surface" aria-labelledby="area-heading"><div className="card-heading"><div><h2 id="area-heading">Approximate areas</h2><p>These are the owner’s early measurements. The porch range and overall total still need reconciliation.</p></div><Ruler size={21} strokeWidth={1.7} aria-hidden="true" /></div><div className="area-rows"><div className="area-row"><div><span>Ground floor</span><strong className="tabular-nums">≈ {formatArea(groundFloor)} <small>sq ft</small></strong></div><div className="area-track" aria-hidden="true"><span className="area-fill area-fill--ground" style={{ width: percentage(groundFloor) }} /></div></div><div className="area-row"><div><span>First floor</span><strong className="tabular-nums">≈ {formatArea(firstFloor)} <small>sq ft</small></strong></div><div className="area-track" aria-hidden="true"><span className="area-fill area-fill--first" style={{ width: percentage(firstFloor) }} /></div></div><div className="area-row"><div><span>Ground-floor RCC porch</span><strong className="tabular-nums">≈ {formatArea(porchMin)}–{formatArea(porchMax)} <small>sq ft</small></strong></div><div className="area-track" aria-hidden="true"><span className="area-fill area-fill--porch" style={{ width: percentage(porchMin) }} />{porchMax > porchMin && <span className="area-range" style={{ left: percentage(porchMin), width: percentage(porchMax - porchMin) }} />}</div></div></div><div className="area-caption"><span>Bar lengths compare the shown areas; the darker segment marks the porch estimate.</span><span>Not a floor plan</span></div></section>
-      <aside className="home-aside"><section className="aside-panel material-panel"><h2>Construction record</h2><p>Reinforced concrete, steel rods and red brick are part of the owner’s description. Brands, grades and quantities enter the ledger only when sources establish them.</p></section><section className="aside-panel"><h2>Further documentation</h2><p>Dated photographs and a simplified exterior model may be added when references are selected for public viewing.</p></section></aside></div>
-    <section className="privacy-surface" aria-labelledby="privacy-heading"><div><span className="privacy-icon"><LockKeyhole size={20} strokeWidth={1.7} aria-hidden="true" /></span><h2 id="privacy-heading">Working plans stay private.</h2><p>Exact location, floor plans, wiring, worker identities and raw receipts stay off the public site. Published entries use safe source descriptions, so readers can understand the record without seeing sensitive documents.</p></div><a className="button button--quiet" href="#journey">Read the journey <ArrowRight size={17} aria-hidden="true" /></a></section>
+    <header className="view-intro home-intro">
+      <h1>The home</h1>
+      <p>{mode === "scenario" ? "The scope and present build state below are owner reports. The illustrative ledger does not describe the house itself." : "A contemporary owner-managed home in Tamil Nadu, built with reinforced concrete, steel and red brick."}</p>
+    </header>
+
+    <section className="home-profile" aria-labelledby="home-profile-title">
+      <div className="home-profile-lead"><h2 id="home-profile-title">Known scope</h2><p>Ground-floor work is under way. The first floor and porch are planned areas; these estimates do not form a reconciled total.</p></div>
+      <div className="home-area-study" role="group" aria-label="Approximate planned areas, compared within their own bands">
+        <div className="home-area-row"><div><span>Ground floor</span><strong className="tabular-nums">≈{formatArea(groundFloor)} sq ft</strong></div><div className="home-area-track"><span style={{ width: areaWidth(groundFloor) }} /></div></div>
+        <div className="home-area-row"><div><span>Planned first floor</span><strong className="tabular-nums">≈{formatArea(firstFloor)} sq ft</strong></div><div className="home-area-track"><span style={{ width: areaWidth(firstFloor) }} /></div></div>
+        <div className="home-area-row"><div><span>Extendable RCC porch</span><strong className="tabular-nums">≈{formatArea(porchMin)}–{formatArea(porchMax)} sq ft</strong></div><div className="home-area-track"><span style={{ width: areaWidth(porchMin) }} /><i style={{ left: areaWidth(porchMin), width: areaWidth(porchMax - porchMin) }} /></div></div>
+      </div>
+      <p className="home-study-caption">Band lengths compare approximate areas only. They do not show completed construction or a floor plan.</p>
+    </section>
+
+    <div className="home-detail-grid">
+      <section className="home-height-study" aria-labelledby="height-title">
+        <div className="home-section-heading"><h2 id="height-title">Ground-floor height</h2><span>Owner report · {formatDate(asOf)}</span></div>
+        <div className="home-height-graphic" aria-hidden="true"><div className="home-height-wall"><span className="home-height-lintel" style={{ bottom: lintelMark }} /></div><span className="home-height-top">≈{brickworkHeightApproxFeet} ft</span><span className="home-height-middle" style={{ bottom: lintelMark }}>≈{lintelHeightApproxFeet} ft</span><span className="home-height-base">Ground</span></div>
+        <dl className="home-height-facts"><div><dt>Brickwork</dt><dd>Red-brick walls near {brickworkHeightApproxFeet} ft</dd></div><div><dt>Lintel</dt><dd>Complete near {lintelHeightApproxFeet} ft</dd></div><div><dt>RCC roof</dt><dd>{roofCast ? "Cast" : "Not cast"}</dd></div></dl>
+        <p className="home-study-caption">A height relationship, not an engineering drawing. Exact stage-completion dates were not supplied.</p>
+      </section>
+      <section className="home-materials" aria-labelledby="home-materials-title"><div className="home-section-heading"><h2 id="home-materials-title">Construction approach</h2><span>Owner description</span></div><dl><div><dt>Reinforced concrete</dt><dd>The ground-floor RCC roof {roofCast ? "has been cast" : "is still to be cast"}.</dd></div><div><dt>Steel rods</dt><dd>TMT steel is included in the reported overall spend; sizes and quantities are unrecorded.</dd></div><div><dt>Red brick</dt><dd>Ground-floor walls have been raised to roughly {brickworkHeightApproxFeet} ft.</dd></div></dl></section>
+    </div>
+
+    <p className="home-privacy-note">Detailed plans, wiring, exact location, worker identities and raw receipts remain private.</p>
   </>;
 }

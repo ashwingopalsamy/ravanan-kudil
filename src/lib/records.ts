@@ -78,6 +78,15 @@ const equipmentSchema = z.strictObject({
   note: text.optional()
 });
 
+const currentStatusSchema = z.strictObject({
+  asOf: day,
+  lintelHeightApproxFeet: z.number().positive(),
+  brickworkHeightApproxFeet: z.number().positive(),
+  groundFloorRoof: z.enum(["not_cast", "cast"]),
+  reportedSpendRangePaise: z.tuple([safeAmount, safeAmount]).refine(([minimum, maximum]) => minimum <= maximum, "Spend range minimum exceeds maximum"),
+  ...provenance
+});
+
 const publicRecordsSchema = z.strictObject({
   schemaVersion: z.literal(2),
   publishedAt: day,
@@ -91,6 +100,7 @@ const publicRecordsSchema = z.strictObject({
       porchMax: estimatedArea
     })
   }),
+  currentStatus: currentStatusSchema,
   entries: z.array(entrySchema),
   finance: z.array(financeSchema),
   attendance: z.array(attendanceSchema),
@@ -103,6 +113,13 @@ const publicRecordsSchema = z.strictObject({
   }
   if (project.areasSqFt.porchMin > project.areasSqFt.porchMax) {
     context.addIssue({ code: "custom", message: "Porch area minimum exceeds maximum" });
+  }
+  if (records.currentStatus.asOf > records.publishedAt) {
+    context.addIssue({ code: "custom", message: "Current status report is dated after publication" });
+  }
+  const currentStatusSourceDate = records.currentStatus.source.date.length === 7 ? `${records.currentStatus.source.date}-01` : records.currentStatus.source.date;
+  if (currentStatusSourceDate > records.publishedAt) {
+    context.addIssue({ code: "custom", message: "Current status source is dated after publication" });
   }
   for (const [id, date] of [["paperwork-began", project.paperworkStarted], ["construction-began", project.constructionStarted]]) {
     const milestone = records.entries.find((entry) => entry.id === id);
@@ -174,6 +191,7 @@ export type AttendanceRecord = PublicRecords["attendance"][number];
 export type MaterialRecord = PublicRecords["materials"][number];
 export type EquipmentRecord = PublicRecords["equipment"][number];
 export type PublicSource = z.infer<typeof sourceSchema>;
+export type CurrentStatus = PublicRecords["currentStatus"];
 
 export const parsedRecords = publicRecordsSchema.safeParse(publicData);
 
@@ -287,4 +305,10 @@ export function monthlySpend(records: PublicRecords): { month: string; paise: nu
     months.set(month, (months.get(month) ?? 0n) + (record.kind === "payment" ? BigInt(record.amountPaise) : -BigInt(record.amountPaise)));
   }
   return [...months].sort(([left], [right]) => left.localeCompare(right)).map(([month, paise]) => ({ month, paise: Number(paise) }));
+}
+
+export function formatLakhsFromPaise(paise: number, fractionDigits = 1): string {
+  if (!Number.isSafeInteger(paise)) throw new RangeError("Money must be a safe integer number of paise");
+  const lakhs = paise / 10_000_000;
+  return new Intl.NumberFormat("en-IN", { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }).format(lakhs);
 }

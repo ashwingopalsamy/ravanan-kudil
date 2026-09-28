@@ -22,6 +22,7 @@ html {
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   background: var(--color-canvas);
   color: var(--color-ink);
@@ -136,8 +137,8 @@ a {
   text-decoration-skip-ink: auto;
 }
 
-a:hover {
-  color: var(--color-accent-ink);
+@media (hover: hover) and (pointer: fine) {
+  a:hover { color: var(--color-accent-ink); }
 }
 
 button,
