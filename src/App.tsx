@@ -25,6 +25,11 @@ function currentRoute(): Route {
   return { view: view as View, entryId: view === "journey" ? entryId : undefined };
 }
 
+function scrollToContentTop() {
+  document.getElementById("content")?.scrollTo({ top: 0, behavior: "auto" });
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
 function readCompactPreference(): boolean {
   try { return window.localStorage.getItem(navigationPreferenceKey) !== "false"; }
   catch { return true; }
@@ -43,7 +48,7 @@ function NavigationLinks({ view, mobile = false }: { view: View; mobile?: boolea
   return (
     <nav className={mobile ? "mobile-navigation" : "rail-navigation"} aria-label={mobile ? "Mobile sections" : "Sections"}>
       {navigation.map(({ id, label, icon: Icon }) => (
-        <a className="navigation-link" href={`#${id}`} key={id} aria-label={label} aria-current={view === id ? "page" : undefined} onClick={() => window.scrollTo(0, 0)}>
+        <a className="navigation-link" href={`#${id}`} key={id} aria-label={label} aria-current={view === id ? "page" : undefined} onClick={scrollToContentTop}>
           <Icon aria-hidden="true" size={20} strokeWidth={1.8} />
           <span>{label}</span>
         </a>
@@ -63,7 +68,7 @@ function AppShell({ records }: { records: PublicRecords }) {
     const update = () => {
       navigated.current = true;
       setRoute(currentRoute());
-      window.scrollTo(0, 0);
+      scrollToContentTop();
     };
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
@@ -86,16 +91,17 @@ function AppShell({ records }: { records: PublicRecords }) {
       <a className="skip-link" href="#content" onClick={(event) => {
         event.preventDefault();
         const content = document.getElementById("content");
-        content?.focus();
-        content?.scrollIntoView({ block: "start" });
+        content?.focus({ preventScroll: true });
+        scrollToContentTop();
       }}>Skip to content</a>
       <aside className="rail surface-dark" aria-label="Site navigation">
-        <a className="brand" href="#overview" aria-label="Ravanan Kudil overview"><span className="brand-mark"><Building2 size={19} aria-hidden="true" /></span></a>
+        <div className="brand"><span className="brand-mark"><Building2 size={19} aria-hidden="true" /></span><span className="brand-name">Ravanan Kudil</span></div>
         <div className="rail-divider" />
         <NavigationLinks view={view} />
         <div className="rail-bottom">
-          <button className="rail-toggle" type="button" onClick={() => setCompact((value) => !value)} aria-label={compact ? "Expand navigation" : "Shrink navigation"} title={compact ? "Expand navigation" : "Shrink navigation"} aria-expanded={!compact}>
+          <button className="rail-toggle" type="button" onClick={() => setCompact((value) => !value)} aria-label={compact ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!compact}>
             {compact ? <PanelLeftOpen size={19} strokeWidth={1.8} /> : <PanelLeftClose size={19} strokeWidth={1.8} />}
+            <span>{compact ? "Expand sidebar" : "Collapse sidebar"}</span>
           </button>
         </div>
       </aside>
@@ -106,9 +112,9 @@ function AppShell({ records }: { records: PublicRecords }) {
             <motion.div
               className="view-frame"
               key={view}
-              initial={reducedMotion ? false : { opacity: 0, filter: "blur(2px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-              exit={reducedMotion ? undefined : { opacity: 0, filter: "blur(2px)" }}
+              initial={reducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reducedMotion ? undefined : { opacity: 0 }}
               transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}
             >
               <FocusOnRoute route={route} navigated={navigated.current} />

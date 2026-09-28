@@ -1,4 +1,4 @@
-import { ArrowRight, Ruler } from "lucide-react";
+import { ArrowRight, ClipboardList, Ruler } from "lucide-react";
 import { JournalPreview } from "../components/Journal";
 import { elapsedCalendarDays, formatArea, formatDate, sortedEntries, type PublicRecords } from "../lib/records";
 
@@ -38,7 +38,7 @@ export function OverviewView({ records }: { records: PublicRecords }) {
         </div>
       </section>
 
-      <aside className="overview-context" aria-label="Home summary">
+      <aside className="overview-context" aria-label="Home and record summary">
         <section className="surface-card context-card" aria-labelledby="scope-title">
           <div className="card-heading">
             <div>
@@ -53,6 +53,18 @@ export function OverviewView({ records }: { records: PublicRecords }) {
           </div>
           <p className="context-note-copy">The porch range is still being reconciled. Detailed plans remain private.</p>
           <a className="text-action" href="#home">Home details <ArrowRight size={16} aria-hidden="true" /></a>
+        </section>
+        <section className="surface-card coverage-card" aria-labelledby="coverage-title">
+          <div className="card-heading">
+            <h2 id="coverage-title">Record coverage</h2>
+            <ClipboardList size={20} strokeWidth={1.7} aria-hidden="true" />
+          </div>
+          <dl className="coverage-list">
+            <div><dt>Finance</dt><dd>{records.finance.length} {records.finance.length === 1 ? "entry" : "entries"}</dd></div>
+            <div><dt>Attendance</dt><dd>{records.attendance.length} {records.attendance.length === 1 ? "date" : "dates"}</dd></div>
+            <div><dt>Materials</dt><dd>{records.materials.length} {records.materials.length === 1 ? "event" : "events"}</dd></div>
+            <div><dt>Equipment</dt><dd>{records.equipment.length} {records.equipment.length === 1 ? "event" : "events"}</dd></div>
+          </dl>
         </section>
       </aside>
     </div>
