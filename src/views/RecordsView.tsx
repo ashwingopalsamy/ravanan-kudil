@@ -2,7 +2,10 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Boxes, CalendarDays, ChevronDown, HardHat, ReceiptText, Search, Truck } from "lucide-react";
 import { MonthlyAttendance } from "../components/MonthlyAttendance";
 import { MonthlySpend } from "../components/MonthlySpend";
+import type { DataMode } from "../components/DataModeControl";
+import { ScenarioRecordsView } from "./ScenarioRecordsView";
 import { formatDate, formatMoney, recordedSpend, sourceTypeLabel, workSummary, type AttendanceRecord, type EquipmentRecord, type FinanceRecord, type MaterialRecord, type PublicRecords } from "../lib/records";
+import type { ScenarioSelection, ScenarioSelectionPatch } from "../lib/scenario-url";
 
 type Category = "finance" | "labour" | "materials" | "equipment";
 
@@ -61,12 +64,13 @@ function searchableText(item: FinanceRecord | AttendanceRecord | MaterialRecord 
   ].filter((value) => value !== undefined).join(" ").toLocaleLowerCase();
 }
 
-export function RecordsView({ records }: { records: PublicRecords }) {
-  const [category, setCategory] = useState<Category>("finance");
+export function RecordsView({ records, mode, selection, onSelectionChange }: { records: PublicRecords; mode: DataMode; selection: ScenarioSelection; onSelectionChange: (patch: ScenarioSelectionPatch) => void }) {
+  const category: Category = selection.recordCategory;
   const [search, setSearch] = useState("");
   const EmptyCategoryIcon = categories.find(({ id }) => id === category)!.icon;
   const selectedCategory = categories.find(({ id }) => id === category)!;
   const counts: Record<Category, number> = { finance: records.finance.length, labour: records.attendance.length, materials: records.materials.length, equipment: records.equipment.length };
+  const hasAnyRecord = Object.values(counts).some((count) => count > 0);
   const spent = recordedSpend(records);
   const work = workSummary(records);
   const filtered = useMemo(() => {
@@ -75,11 +79,13 @@ export function RecordsView({ records }: { records: PublicRecords }) {
     return [...data].filter((item) => !query || searchableText(item).includes(query)).sort((a, b) => b.date.localeCompare(a.date));
   }, [category, records, search]);
 
+  if (mode === "scenario") return <ScenarioRecordsView status={records.currentStatus} selection={selection} onSelectionChange={onSelectionChange} />;
+
   return <>
     <header className="view-intro"><div className="view-intro-line"><div><h1>Records</h1><p>Spending, labour, materials and equipment are dated separately. Totals use only supporting entries.</p></div></div></header>
     <div className="records-primary">
       <section className="records-surface" aria-labelledby="register-title"><div className="records-header"><div><h2 id="register-title">{selectedCategory.label} entries</h2></div></div>
-        <div className="category-tabs" role="group" aria-label="Record type">{categories.map(({ id, label, icon: Icon }) => <button className="category-tab" type="button" key={id} aria-pressed={category === id} onClick={() => { setCategory(id); setSearch(""); }}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></button>)}</div>
+        <div className="category-tabs" role="group" aria-label="Record type">{categories.map(({ id, label }) => <button className="category-tab" type="button" key={id} aria-pressed={category === id} onClick={() => { onSelectionChange({ recordCategory: id }); setSearch(""); }}><span>{label}</span></button>)}</div>
         {counts[category] > 0 && <div className="records-toolbar"><label className="record-search"><Search size={17} aria-hidden="true" /><span className="sr-only">Search {category} records</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${category} records`} /></label><span>Newest first</span></div>}
         <div className="records-body">{filtered.length ? filtered.map((item) => {
           if (category === "finance") return <FinanceRow key={item.id} item={item as FinanceRecord} />;
@@ -88,7 +94,7 @@ export function RecordsView({ records }: { records: PublicRecords }) {
           return <EquipmentRow key={item.id} item={item as EquipmentRecord} />;
         }) : counts[category] ? <div className="empty-record empty-record--search"><Search size={24} strokeWidth={1.6} aria-hidden="true" /><h3>No matching records.</h3><p>Try a different search term.</p></div> : <div className="empty-record"><span className="empty-record-icon"><EmptyCategoryIcon size={21} strokeWidth={1.7} aria-hidden="true" /></span><div className="empty-record-copy"><h3>{emptyCopy[category].title}</h3><p>{emptyCopy[category].text}</p></div><div className="empty-record-rule"><span className="overline">How this is counted</span><p>{emptyCopy[category].note}</p></div></div>}</div>
       </section>
-      <div className="record-metrics" aria-label="Recorded measures"><div><span>Recorded spend</span><strong className="tabular-nums">{spent === null ? "Not recorded" : formatMoney(spent)}</strong><small>Payments less refunds</small></div><div><span>Dates with work</span><strong className="tabular-nums">{work.workdays === null ? "Not recorded" : work.workdays}</strong><small>Confirmed attendance dates</small></div><div><span>Worker-days</span><strong className="tabular-nums">{work.workerDays === null ? "Not recorded" : `${work.incomplete ? "At least " : ""}${work.workerDays}`}</strong><small>Sum of known daily headcounts</small></div></div>
+      {hasAnyRecord && <div className="record-metrics" aria-label="Recorded measures"><div><span>Itemised recorded spend</span><strong className="tabular-nums">{spent === null ? "Not recorded" : formatMoney(spent)}</strong><small>{spent === null ? `Owner-reported overall range: ${formatMoney(records.currentStatus.reportedSpendRangePaise[0])}–${formatMoney(records.currentStatus.reportedSpendRangePaise[1])}; payments are not itemised.` : "Payments less refunds"}</small></div><div><span>Dates with work</span><strong className="tabular-nums">{work.workdays === null ? "Not recorded" : work.workdays}</strong><small>Confirmed attendance dates</small></div><div><span>Worker-days</span><strong className="tabular-nums">{work.workerDays === null ? "Not recorded" : `${work.incomplete ? "At least " : ""}${work.workerDays}`}</strong><small>Sum of known daily headcounts</small></div></div>}
     </div>
     {category === "finance" && <MonthlySpend records={records} />}
     {category === "labour" && <MonthlyAttendance records={records} />}

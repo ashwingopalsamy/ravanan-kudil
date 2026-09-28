@@ -15,12 +15,13 @@ export function JournalPreview({ entries, previewTextById }: { entries: JournalE
   );
 }
 
-export function JournalDetail({ entry, selected = false }: { entry: JournalEntry; selected?: boolean }) {
+export function JournalDetail({ entry, selected = false, latest = false }: { entry: JournalEntry; selected?: boolean; latest?: boolean }) {
   return (
-    <details className="journal-detail" id={`journal-${entry.id}`} open={selected}>
+    <details className="journal-detail" id={`journal-${entry.id}`} open={selected || latest}>
       <summary>
         <span className="journal-detail-title">{entry.title}</span>
         <span className="journal-detail-date"><time dateTime={entry.date}>{formatDate(entry.date, "long")}</time>{entry.date.length === 7 && <small>Month-level date</small>}</span>
+        <span className="journal-detail-preview">{entry.body}</span>
         <ChevronDown size={18} aria-hidden="true" className="disclosure-chevron" />
       </summary>
       <div className="journal-detail-content"><p>{entry.body}</p><dl className="record-source"><div><dt>Source type</dt><dd>{sourceTypeLabel(entry.source)}</dd></div><div><dt>Source dated</dt><dd><time dateTime={entry.source.date}>{formatDate(entry.source.date, "long")}</time></dd></div>{entry.source.description && <div><dt>Source note</dt><dd>{entry.source.description}</dd></div>}{entry.corrections?.map((correction, index) => <div className="record-correction" key={`${correction.date}-${index}`}><dt>Correction</dt><dd><time dateTime={correction.date}>{formatDate(correction.date, "long")}</time> · {correction.note}</dd></div>)}</dl></div>

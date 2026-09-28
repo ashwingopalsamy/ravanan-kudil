@@ -23,11 +23,18 @@
   --color-line-soft: #efefef;
   --color-line-strong: #d4d4d4;
 
-  /* State and focus cues stay achromatic throughout the public interface. */
+  /* Interactive controls stay neutral; construction data uses two quiet material cues. */
   --color-accent: #292929;
   --color-accent-hover: #111111;
   --color-accent-subtle: #f2f2f2;
   --color-accent-ink: #242424;
+  --color-data-cost: #3c6788;
+  --color-data-cost-subtle: #edf3f7;
+  --color-data-cost-muted: #7294ae;
+  --color-data-cost-border: #d8e4eb;
+  --color-data-labour: #2f7573;
+  --color-data-labour-subtle: #edf5f4;
+  --color-data-labour-muted: #6b9b99;
   --color-focus: #555555;
   --color-focus-inverse: #ffffff;
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "publishedAt": "2026-09-27",
+  "publishedAt": "2026-09-29",
   "project": {
     "paperworkStarted": "2024-12",
     "constructionStarted": "2026-03-06",
@@ -10,6 +10,14 @@
       "porchMin": 500,
       "porchMax": 600
     }
+  },
+  "currentStatus": {
+    "asOf": "2026-09-28",
+    "lintelHeightApproxFeet": 8,
+    "brickworkHeightApproxFeet": 11,
+    "groundFloorRoof": "not_cast",
+    "reportedSpendRangePaise": [240000000, 260000000],
+    "source": { "kind": "owner_report", "date": "2026-09-28", "description": "Owner's progress and approximate spend summary" }
   },
   "entries": [
     {
@@ -25,6 +33,13 @@
       "title": "Construction began on site",
       "body": "The physical build started on 6 March 2026. Dated work notes, attendance and costs will appear as their records are reconciled.",
       "source": { "kind": "owner_report", "date": "2026-09" }
+    },
+    {
+      "id": "owner-progress-2026-09-28",
+      "date": "2026-09-28",
+      "title": "Owner's stage report: ground-floor lintel and brickwork",
+      "body": "In the owner's report dated 28 September 2026, the ground-floor lintel is complete at approximately 8 ft, and red-brick walls continue to approximately 11 ft. The ground-floor RCC roof has not yet been cast. The owner estimates total spending so far at approximately ₹24–26 lakh, including labour, cement, TMT steel, M-sand, P-sand, 20 mm and 40 mm jalli, and associated costs. The precise dates when the lintel and wall heights were reached, and itemised payments, have not been supplied.",
+      "source": { "kind": "owner_report", "date": "2026-09-28", "description": "Owner's progress and approximate spend summary" }
     }
   ],
   "finance": [],
