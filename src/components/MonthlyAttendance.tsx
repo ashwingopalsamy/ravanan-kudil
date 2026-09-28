@@ -10,11 +10,7 @@ export function MonthlyAttendance({ records }: { records: PublicRecords }) {
   return (
     <section className="monthly-attendance" aria-labelledby="monthly-attendance-title">
       <div className="card-heading">
-        <div>
-          <span className="overline">Dated attendance only</span>
-          <h2 id="monthly-attendance-title">Recorded attendance by month</h2>
-        </div>
-        <span className="state-label">{months.length} {months.length === 1 ? "month" : "months"}</span>
+        <h2 id="monthly-attendance-title">Attendance by month</h2>
       </div>
       <div className="attendance-month-list">
         {months.map((month) => {

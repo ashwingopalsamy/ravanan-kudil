@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { Boxes, CalendarDays, ChevronDown, ClipboardList, HardHat, ReceiptText, Search, Truck } from "lucide-react";
+import { Boxes, CalendarDays, ChevronDown, HardHat, ReceiptText, Search, Truck } from "lucide-react";
 import { MonthlyAttendance } from "../components/MonthlyAttendance";
 import { MonthlySpend } from "../components/MonthlySpend";
 import { formatDate, formatMoney, recordedSpend, sourceTypeLabel, workSummary, type AttendanceRecord, type EquipmentRecord, type FinanceRecord, type MaterialRecord, type PublicRecords } from "../lib/records";
@@ -41,11 +41,11 @@ function LabourRow({ item }: { item: AttendanceRecord }) {
 }
 
 function MaterialRow({ item }: { item: MaterialRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><Boxes size={19} aria-hidden="true" /></span><span className="data-row-main"><span className="data-row-title"><strong>{item.name}</strong><span className="event-action">{eventActionLabel[item.action]}</span></span>{item.specification && <small>{item.specification}</small>}</span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value"><span className="tabular-nums">{item.quantity}</span>{" "}<span className="data-row-unit">{item.unit}</span></strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={eventActionLabel[item.action]} /><ProvenanceLines item={item} />{item.specification && <DetailLine label="Specification" value={item.specification} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><Boxes size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{eventActionLabel[item.action]}{item.specification ? ` · ${item.specification}` : ""}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value"><span className="tabular-nums">{item.quantity}</span>{" "}<span className="data-row-unit">{item.unit}</span></strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={eventActionLabel[item.action]} /><ProvenanceLines item={item} />{item.specification && <DetailLine label="Specification" value={item.specification} />}</dl></details>;
 }
 
 function EquipmentRow({ item }: { item: EquipmentRecord }) {
-  return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><span className="data-row-title"><strong>{item.name}</strong><span className="event-action">{eventActionLabel[item.action]}</span></span></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value"><span className="tabular-nums">{item.quantity}</span>{" "}<span className="data-row-unit">{item.unit}</span></strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={eventActionLabel[item.action]} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
+  return <details className="data-row"><summary><span className="data-row-icon"><Truck size={19} aria-hidden="true" /></span><span className="data-row-main"><strong>{item.name}</strong><small>{eventActionLabel[item.action]}</small></span><time dateTime={item.date}>{formatDate(item.date)}</time><strong className="data-row-value"><span className="tabular-nums">{item.quantity}</span>{" "}<span className="data-row-unit">{item.unit}</span></strong><ChevronDown className="disclosure-chevron" size={18} aria-hidden="true" /></summary><dl className="data-row-details"><DetailLine label="Event" value={eventActionLabel[item.action]} /><ProvenanceLines item={item} />{item.note && <DetailLine label="Note" value={item.note} />}</dl></details>;
 }
 
 function searchableText(item: FinanceRecord | AttendanceRecord | MaterialRecord | EquipmentRecord): string {
@@ -65,8 +65,8 @@ export function RecordsView({ records }: { records: PublicRecords }) {
   const [category, setCategory] = useState<Category>("finance");
   const [search, setSearch] = useState("");
   const EmptyCategoryIcon = categories.find(({ id }) => id === category)!.icon;
+  const selectedCategory = categories.find(({ id }) => id === category)!;
   const counts: Record<Category, number> = { finance: records.finance.length, labour: records.attendance.length, materials: records.materials.length, equipment: records.equipment.length };
-  const itemCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
   const spent = recordedSpend(records);
   const work = workSummary(records);
   const filtered = useMemo(() => {
@@ -76,10 +76,10 @@ export function RecordsView({ records }: { records: PublicRecords }) {
   }, [category, records, search]);
 
   return <>
-    <header className="view-intro"><div className="eyebrow"><span className="eyebrow-mark" /> The evidence / Public record</div><div className="view-intro-line"><div><h1>Every figure has a source.</h1><p>Money, labour, materials and equipment are dated separately. Totals use only supporting entries.</p></div>{itemCount > 0 && <span className="count-pill">{itemCount} itemised {itemCount === 1 ? "record" : "records"}</span>}</div></header>
+    <header className="view-intro"><div className="view-intro-line"><div><h1>Records</h1><p>Spending, labour, materials and equipment are dated separately. Totals use only supporting entries.</p></div></div></header>
     <div className="records-primary">
-      <section className="records-surface" aria-labelledby="register-title"><div className="records-header"><div><span className="overline">Itemised source data</span><h2 id="register-title">Record register</h2></div><span className="records-header-note"><ClipboardList size={16} aria-hidden="true" /> Public entries only</span></div>
-        <div className="category-tabs" role="group" aria-label="Record type">{categories.map(({ id, label, icon: Icon }) => <button className="category-tab" type="button" key={id} aria-pressed={category === id} onClick={() => { setCategory(id); setSearch(""); }}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span><small>{counts[id]}</small></button>)}</div>
+      <section className="records-surface" aria-labelledby="register-title"><div className="records-header"><div><h2 id="register-title">{selectedCategory.label} entries</h2></div></div>
+        <div className="category-tabs" role="group" aria-label="Record type">{categories.map(({ id, label, icon: Icon }) => <button className="category-tab" type="button" key={id} aria-pressed={category === id} onClick={() => { setCategory(id); setSearch(""); }}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></button>)}</div>
         {counts[category] > 0 && <div className="records-toolbar"><label className="record-search"><Search size={17} aria-hidden="true" /><span className="sr-only">Search {category} records</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${category} records`} /></label><span>Newest first</span></div>}
         <div className="records-body">{filtered.length ? filtered.map((item) => {
           if (category === "finance") return <FinanceRow key={item.id} item={item as FinanceRecord} />;

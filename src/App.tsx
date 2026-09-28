@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { BookOpenText, ChevronLeft, ChevronRight, House, Layers3, PanelLeftClose, PanelLeftOpen, ReceiptText } from "lucide-react";
+import { BookOpenText, Building2, House, Layers3, PanelLeftClose, PanelLeftOpen, ReceiptText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { formatDate, parsedRecords, type PublicRecords } from "./lib/records";
+import { parsedRecords, type PublicRecords } from "./lib/records";
 import { HomeView } from "./views/HomeView";
 import { JourneyView } from "./views/JourneyView";
 import { OverviewView } from "./views/OverviewView";
@@ -15,8 +15,9 @@ const navigation: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "overview", label: "Overview", icon: Layers3 },
   { id: "journey", label: "Journey", icon: BookOpenText },
   { id: "records", label: "Records", icon: ReceiptText },
-  { id: "home", label: "The home", icon: House }
+  { id: "home", label: "Home", icon: House }
 ];
+const navigationPreferenceKey = "rk-compact-nav-v2";
 
 function currentRoute(): Route {
   const [view, entryId] = window.location.hash.slice(1).split("/");
@@ -25,8 +26,8 @@ function currentRoute(): Route {
 }
 
 function readCompactPreference(): boolean {
-  try { return window.localStorage.getItem("rk-compact-nav") === "true"; }
-  catch { return false; }
+  try { return window.localStorage.getItem(navigationPreferenceKey) !== "false"; }
+  catch { return true; }
 }
 
 function FocusOnRoute({ route, navigated }: { route: Route; navigated: boolean }) {
@@ -69,7 +70,7 @@ function AppShell({ records }: { records: PublicRecords }) {
   }, []);
 
   useEffect(() => {
-    try { window.localStorage.setItem("rk-compact-nav", String(compact)); }
+    try { window.localStorage.setItem(navigationPreferenceKey, String(compact)); }
     catch { /* The navigation still works when storage is unavailable. */ }
   }, [compact]);
 
@@ -89,33 +90,26 @@ function AppShell({ records }: { records: PublicRecords }) {
         content?.scrollIntoView({ block: "start" });
       }}>Skip to content</a>
       <aside className="rail surface-dark" aria-label="Site navigation">
-        <a className="brand" href="#overview" aria-label="Ravanan Kudil overview"><span className="brand-mark">RK</span><span className="brand-name">Ravanan Kudil</span></a>
+        <a className="brand" href="#overview" aria-label="Ravanan Kudil overview"><span className="brand-mark"><Building2 size={19} aria-hidden="true" /></span></a>
         <div className="rail-divider" />
         <NavigationLinks view={view} />
         <div className="rail-bottom">
-          <span className="rail-caption">A public build record</span>
-          <button className="rail-toggle" type="button" onClick={() => setCompact((value) => !value)} aria-label={compact ? "Expand navigation" : "Shrink navigation"} aria-expanded={!compact}>
+          <button className="rail-toggle" type="button" onClick={() => setCompact((value) => !value)} aria-label={compact ? "Expand navigation" : "Shrink navigation"} title={compact ? "Expand navigation" : "Shrink navigation"} aria-expanded={!compact}>
             {compact ? <PanelLeftOpen size={19} strokeWidth={1.8} /> : <PanelLeftClose size={19} strokeWidth={1.8} />}
-            <span>{compact ? "Expand" : "Shrink"}</span>
           </button>
         </div>
       </aside>
 
       <div className="app-main">
-        <header className="topbar">
-          <div className="topbar-identity"><span className="mobile-brand-mark" aria-hidden="true">RK</span><span>Ravanan Kudil</span><ChevronRight aria-hidden="true" size={14} /><strong>{navigation.find((item) => item.id === view)?.label}</strong></div>
-          <span className="topbar-updated"><span>Record updated </span>{formatDate(records.publishedAt)}</span>
-        </header>
-
         <main className="main-content" id="content" tabIndex={-1} aria-label={`${navigation.find((item) => item.id === view)?.label} content`}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               className="view-frame"
               key={view}
-              initial={reducedMotion ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reducedMotion ? undefined : { opacity: 0, y: -5 }}
-              transition={{ duration: reducedMotion ? 0 : 0.2, ease: "easeOut" }}
+              initial={reducedMotion ? false : { opacity: 0, filter: "blur(2px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={reducedMotion ? undefined : { opacity: 0, filter: "blur(2px)" }}
+              transition={{ duration: reducedMotion ? 0 : 0.16, ease: "easeOut" }}
             >
               <FocusOnRoute route={route} navigated={navigated.current} />
               {content}
@@ -123,7 +117,6 @@ function AppShell({ records }: { records: PublicRecords }) {
           </AnimatePresence>
         </main>
 
-        <footer className="app-footer"><span>Ravanan Kudil <span aria-hidden="true">·</span> Tamil Nadu</span><span>Owner-managed, openly documented</span><a href="#overview"><ChevronLeft size={15} aria-hidden="true" /> Back to overview</a></footer>
       </div>
       <NavigationLinks view={view} mobile />
     </div>
@@ -133,7 +126,7 @@ function AppShell({ records }: { records: PublicRecords }) {
 export function App() {
   if (!parsedRecords.success) {
     console.error("Public records need correction", parsedRecords.error);
-    return <main className="data-error"><span className="brand-mark">RK</span><h1>The public record needs correction.</h1><p>The dates and figures are temporarily unavailable. The source data must be checked before this page can show them.</p></main>;
+    return <main className="data-error"><span className="brand-mark"><Building2 size={19} aria-hidden="true" /></span><h1>The public record needs correction.</h1><p>The dates and figures are temporarily unavailable. The source data must be checked before this page can show them.</p></main>;
   }
   return <AppShell records={parsedRecords.data} />;
 }
