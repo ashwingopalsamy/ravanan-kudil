@@ -23,28 +23,27 @@ export function OverviewView({ records, mode, selection, onSelectionChange }: { 
   return <>
     <header className="view-intro overview-intro">
       <h1>Ravanan Kudil</h1>
+      <span className="overview-owner-date">Owner report · {formatDate(records.currentStatus.asOf, "long")}</span>
     </header>
 
-    <section className="overview-summary" aria-label="Reported cost, current stage and labour record">
+    <section className="overview-summary" aria-label={`Owner-reported spending and stage; ${mode === "scenario" ? "illustrative labour" : "unrecorded labour"}`}>
       <div className="overview-summary-main">
         <div className="overview-measure overview-measure--cost">
-          <span className="overview-measure-label">Estimated spent to date</span>
+          <span className="overview-measure-label">Spent to date</span>
           <strong>₹{reportedRange} <span>lakh</span></strong>
-          <span className="overview-measure-source">Owner estimate · {formatDate(records.currentStatus.asOf, "long")}</span>
         </div>
         <div className="overview-measure overview-measure--stage">
-          <span className="overview-measure-label">Current stage · ground floor</span>
+          <span className="overview-measure-label">Ground-floor stage</span>
           <strong>{roofCast ? "RCC roof cast" : `Brickwork to ≈${records.currentStatus.brickworkHeightApproxFeet} ft`}</strong>
-          <p>Lintel complete near {records.currentStatus.lintelHeightApproxFeet} ft<span aria-hidden="true"> · </span>{roofCast ? "Roof cast" : "Roof not cast"}</p>
-          <span className="overview-measure-source">Owner report · {formatDate(records.currentStatus.asOf, "long")}</span>
+          <p>Lintel ≈{records.currentStatus.lintelHeightApproxFeet} ft complete<span aria-hidden="true"> · </span>{roofCast ? "RCC roof cast" : "RCC roof not cast"}</p>
         </div>
       </div>
       <div className="overview-labour-line">
         <div className={`overview-measure overview-measure--labour${mode === "record" ? " is-unrecorded" : ""}`}>
-          <span className="overview-measure-label">{mode === "scenario" ? "Illustrative labour model" : "Labour · owner record"}</span>
+          <span className="overview-measure-label">{mode === "scenario" ? "Illustrative labour" : "Labour attendance"}</span>
           <strong>{mode === "scenario" ? <>{illustrativeScenario.workerDays} <span>worker-days</span></> : "Unrecorded"}</strong>
         </div>
-        {mode === "scenario" && <div className="overview-labour-context"><p>{illustrativeScenario.workedDates} assumed work dates · crew of 2–3</p><details><summary>How this was modelled</summary><p>Worker-days add the daily crew counts. They are not distinct people or hours. Actual attendance has not been recorded.</p></details></div>}
+        {mode === "scenario" && <div className="overview-labour-context"><dl><div><dt>Assumed dates</dt><dd>{illustrativeScenario.workedDates}</dd></div><div><dt>Crew per date</dt><dd>2–3</dd></div></dl><details><summary>Worker-day definition</summary><p>One worker on one assumed work date is one worker-day. This model is not actual attendance or a count of distinct people or hours.</p></details></div>}
       </div>
     </section>
 
