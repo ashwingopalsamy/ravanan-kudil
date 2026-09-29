@@ -23,19 +23,32 @@ export function OverviewView({ records, mode, selection, onSelectionChange }: { 
   return <>
     <header className="view-intro overview-intro">
       <h1>Ravanan Kudil</h1>
-      <p>An owner-managed build, documented as it unfolds.</p>
     </header>
 
     <section className="overview-summary" aria-label="Reported cost, current stage and labour record">
-      <div className="overview-summary-row overview-summary-cost"><span>Estimated spent to date<small>Owner report · approximate</small></span><strong>₹{reportedRange} lakh</strong><small>Reported {formatDate(records.currentStatus.asOf, "long")} · itemised payments are not recorded</small></div>
-      <div className="overview-summary-row"><span>Reported stage</span><strong>{roofCast ? "Ground-floor RCC roof cast" : `Ground-floor brickwork · ≈${records.currentStatus.brickworkHeightApproxFeet} ft`}</strong><small>Owner report · {formatDate(records.currentStatus.asOf, "long")} · lintel complete at ≈{records.currentStatus.lintelHeightApproxFeet} ft · {roofCast ? "RCC roof cast" : "RCC roof not cast"}</small></div>
-      {mode === "scenario" ? <div className="overview-summary-row overview-summary-labour"><span>Illustrative labour model <small>Assumptions only · not actual attendance</small></span><strong>{illustrativeScenario.workerDays} worker-days</strong><small>{illustrativeScenario.workedDates} assumed work dates · 2–3 modelled crew · not unique people or hours</small></div> : <div className="overview-summary-row"><span>Attendance record</span><strong>Not recorded</strong><small>Work dates and worker-days have not yet been established from dated sources.</small></div>}
+      <div className="overview-summary-main">
+        <div className="overview-measure overview-measure--cost">
+          <span className="overview-measure-label">Estimated spent to date</span>
+          <strong>₹{reportedRange} <span>lakh</span></strong>
+          <span className="overview-measure-source">Owner estimate · {formatDate(records.currentStatus.asOf, "long")}</span>
+        </div>
+        <div className="overview-measure overview-measure--stage">
+          <span className="overview-measure-label">Current stage · ground floor</span>
+          <strong>{roofCast ? "RCC roof cast" : `Brickwork to ≈${records.currentStatus.brickworkHeightApproxFeet} ft`}</strong>
+          <p>Lintel complete near {records.currentStatus.lintelHeightApproxFeet} ft<span aria-hidden="true"> · </span>{roofCast ? "Roof cast" : "Roof not cast"}</p>
+          <span className="overview-measure-source">Owner report · {formatDate(records.currentStatus.asOf, "long")}</span>
+        </div>
+      </div>
+      <div className="overview-labour-line">
+        <div className={`overview-measure overview-measure--labour${mode === "record" ? " is-unrecorded" : ""}`}>
+          <span className="overview-measure-label">{mode === "scenario" ? "Illustrative labour model" : "Labour · owner record"}</span>
+          <strong>{mode === "scenario" ? <>{illustrativeScenario.workerDays} <span>worker-days</span></> : "Unrecorded"}</strong>
+        </div>
+        {mode === "scenario" && <div className="overview-labour-context"><p>{illustrativeScenario.workedDates} assumed work dates · crew of 2–3</p><details><summary>How this was modelled</summary><p>Worker-days add the daily crew counts. They are not distinct people or hours. Actual attendance has not been recorded.</p></details></div>}
+      </div>
     </section>
 
-    {latestEntry && <section className="latest-entry-card" aria-label="Latest dated owner update">
-      <span className="latest-entry-meta">Latest owner report · {formatDate(latestEntry.source.date, "long")}</span>
-      <a className="latest-entry-link" href={`#journey/${latestEntry.id}`}>Read the stage and spend note <ArrowRight size={16} aria-hidden="true" /></a>
-    </section>}
+    {latestEntry && <a className="overview-latest-link" href={`#journey/${latestEntry.id}`}>Read the latest owner note <ArrowRight size={16} aria-hidden="true" /></a>}
 
     {mode === "scenario" ? <>
       <div className="scenario-dashboard-grid">

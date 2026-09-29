@@ -130,9 +130,9 @@ function AppShell({ records }: { records: PublicRecords }) {
 
   const content = {
     overview: <OverviewView records={records} mode={dataMode} selection={scenarioSelection} onSelectionChange={changeScenarioSelection} />,
-    journey: <JourneyView records={records} mode={dataMode} selectedEntryId={route.entryId} />,
+    journey: <JourneyView records={records} selectedEntryId={route.entryId} />,
     records: <RecordsView records={records} mode={dataMode} selection={scenarioSelection} onSelectionChange={changeScenarioSelection} />,
-    home: <HomeView records={records} mode={dataMode} />
+    home: <HomeView records={records} />
   }[view];
 
   return (
