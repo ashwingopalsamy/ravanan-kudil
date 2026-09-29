@@ -23,19 +23,31 @@ export function OverviewView({ records, mode, selection, onSelectionChange }: { 
   return <>
     <header className="view-intro overview-intro">
       <h1>Ravanan Kudil</h1>
-      <p>An owner-managed build, documented as it unfolds.</p>
+      <span className="overview-owner-date">Owner report · {formatDate(records.currentStatus.asOf, "long")}</span>
     </header>
 
-    <section className="overview-summary" aria-label="Reported cost, current stage and labour record">
-      <div className="overview-summary-row overview-summary-cost"><span>Estimated spent to date<small>Owner report · approximate</small></span><strong>₹{reportedRange} lakh</strong><small>Reported {formatDate(records.currentStatus.asOf, "long")} · itemised payments are not recorded</small></div>
-      <div className="overview-summary-row"><span>Reported stage</span><strong>{roofCast ? "Ground-floor RCC roof cast" : `Ground-floor brickwork · ≈${records.currentStatus.brickworkHeightApproxFeet} ft`}</strong><small>Owner report · {formatDate(records.currentStatus.asOf, "long")} · lintel complete at ≈{records.currentStatus.lintelHeightApproxFeet} ft · {roofCast ? "RCC roof cast" : "RCC roof not cast"}</small></div>
-      {mode === "scenario" ? <div className="overview-summary-row overview-summary-labour"><span>Illustrative labour model <small>Assumptions only · not actual attendance</small></span><strong>{illustrativeScenario.workerDays} worker-days</strong><small>{illustrativeScenario.workedDates} assumed work dates · 2–3 modelled crew · not unique people or hours</small></div> : <div className="overview-summary-row"><span>Attendance record</span><strong>Not recorded</strong><small>Work dates and worker-days have not yet been established from dated sources.</small></div>}
+    <section className="overview-summary" aria-label={`Owner-reported spending and stage; ${mode === "scenario" ? "illustrative labour" : "unrecorded labour"}`}>
+      <div className="overview-summary-main">
+        <div className="overview-measure overview-measure--cost">
+          <span className="overview-measure-label">Spent to date</span>
+          <strong>₹{reportedRange} <span>lakh</span></strong>
+        </div>
+        <div className="overview-measure overview-measure--stage">
+          <span className="overview-measure-label">Ground-floor stage</span>
+          <strong>{roofCast ? "RCC roof cast" : `Brickwork to ≈${records.currentStatus.brickworkHeightApproxFeet} ft`}</strong>
+          <p>Lintel ≈{records.currentStatus.lintelHeightApproxFeet} ft complete<span aria-hidden="true"> · </span>{roofCast ? "RCC roof cast" : "RCC roof not cast"}</p>
+        </div>
+      </div>
+      <div className="overview-labour-line">
+        <div className={`overview-measure overview-measure--labour${mode === "record" ? " is-unrecorded" : ""}`}>
+          <span className="overview-measure-label">{mode === "scenario" ? "Illustrative labour" : "Labour attendance"}</span>
+          <strong>{mode === "scenario" ? <>{illustrativeScenario.workerDays} <span>worker-days</span></> : "Unrecorded"}</strong>
+        </div>
+        {mode === "scenario" && <div className="overview-labour-context"><dl><div><dt>Assumed dates</dt><dd>{illustrativeScenario.workedDates}</dd></div><div><dt>Crew per date</dt><dd>2–3</dd></div></dl><details><summary>Worker-day definition</summary><p>One worker on one assumed work date is one worker-day. This model is not actual attendance or a count of distinct people or hours.</p></details></div>}
+      </div>
     </section>
 
-    {latestEntry && <section className="latest-entry-card" aria-label="Latest dated owner update">
-      <span className="latest-entry-meta">Latest owner report · {formatDate(latestEntry.source.date, "long")}</span>
-      <a className="latest-entry-link" href={`#journey/${latestEntry.id}`}>Read the stage and spend note <ArrowRight size={16} aria-hidden="true" /></a>
-    </section>}
+    {latestEntry && <a className="overview-latest-link" href={`#journey/${latestEntry.id}`}>Read the latest owner note <ArrowRight size={16} aria-hidden="true" /></a>}
 
     {mode === "scenario" ? <>
       <div className="scenario-dashboard-grid">

@@ -1,4 +1,4 @@
-import { ArrowRight, BrickWall, CircleCheck, Construction, HardHat, Layers3, Package, ReceiptIndianRupee, UsersRound } from "lucide-react";
+import { ArrowRight, BrickWall, CircleCheck, Construction, HardHat, ReceiptIndianRupee } from "lucide-react";
 import { formatDate, formatLakhsFromPaise, formatMoney, type CurrentStatus } from "../lib/records";
 import { formatScenarioQuantity, illustrativeScenario } from "../lib/scenario";
 import type { ScenarioSelection, ScenarioSelectionPatch } from "../lib/scenario-url";
@@ -67,10 +67,10 @@ export function ScenarioAllocationByMonth({ selection, onSelectionChange }: { se
 
   return <section className="scenario-panel" aria-labelledby="scenario-monthly-title">
     <div className="scenario-panel-heading">
-      <div className="scenario-heading-label"><ReceiptIndianRupee size={19} aria-hidden="true" /><div><h2 id="scenario-monthly-title">Monthly cost model</h2><p>Illustrative allocations · not dated payments</p></div></div>
+      <h2 id="scenario-monthly-title">Illustrative monthly costs</h2>
     </div>
     <figure className="scenario-month-chart" aria-labelledby="scenario-monthly-title">
-      <div className="scenario-chart-legend"><span><i className="scenario-legend-bar" />Monthly allocation</span><span><i className="scenario-legend-line" />Cumulative allocation</span><small>₹ lakh · two independent scales</small></div>
+      <div className="scenario-chart-legend"><span><i className="scenario-legend-bar" />Monthly</span><span><i className="scenario-legend-line" />Cumulative</span><small>₹ lakh · separate scales</small></div>
       <svg className="scenario-allocation-svg" viewBox="0 0 800 292" role="group" aria-label="Select a month to inspect modelled monthly and cumulative allocations">
         {[0, 0.5, 1].map((fraction) => {
           const y = plot.bottom - fraction * (plot.bottom - plot.top);
@@ -94,9 +94,9 @@ export function ScenarioAllocationByMonth({ selection, onSelectionChange }: { se
         {months.map((month, index) => <circle key={month.month} className="scenario-chart-cumulative-point" cx={xAt(index)} cy={yForCumulative(month.cumulativePaise)} r={month.month === selectedMonth.month ? 5 : 3} />)}
       </svg>
       <ol className="scenario-allocation-month-labels" aria-hidden="true">{months.map((month) => <li className={month.month === selectedMonth.month ? "is-selected" : undefined} key={month.month}><time dateTime={month.month}>{formatDate(month.month).split(" ")[0].slice(0, 3)}</time><strong>{formatLakhsFromPaise(month.paise)}L</strong></li>)}</ol>
-      <figcaption>Bars scale to ₹{formatLakhsFromPaise(peak.paise)} lakh; the cumulative line scales to ₹{formatLakhsFromPaise(total)} lakh. March covers 6–31 Mar and September 1–28 Sep. These are monthly model buckets, not dated payments.</figcaption>
+      <figcaption>March covers 6–31; September covers 1–28. Model allocations are not dated payments.</figcaption>
     </figure>
-    <div className="scenario-selection-detail"><div><span>{formatDate(selectedMonth.month)} · monthly allocation</span><strong>{formatMoney(selectedMonth.paise)}</strong></div><div><span>Cumulative through {formatDate(selectedMonth.month)}</span><strong>{formatMoney(selectedMonth.cumulativePaise)}</strong></div><p>{sliceTotal === selectedMonth.paise ? "Category allocations reconcile to this month’s total." : "Category allocations do not reconcile; review the model."}</p><ul>{categorySlices.map(({ category, paise }) => <li key={category}><span>{category}</span><strong>{formatMoney(paise)}</strong></li>)}</ul><a className="text-action" href="#records" onClick={(event) => { event.preventDefault(); onSelectionChange({ recordCategory: "finance", month: selectedMonth.month }); }}>Open finance allocations <ArrowRight size={16} aria-hidden="true" /></a></div>
+    <div className="scenario-selection-detail"><div><span>{formatDate(selectedMonth.month)} · monthly allocation</span><strong>{formatMoney(selectedMonth.paise)}</strong></div><div><span>Cumulative through {formatDate(selectedMonth.month)}</span><strong>{formatMoney(selectedMonth.cumulativePaise)}</strong></div>{sliceTotal !== selectedMonth.paise && <p>Category allocations do not reconcile; review the model.</p>}<ul>{categorySlices.map(({ category, paise }) => <li key={category}><span>{category}</span><strong>{formatMoney(paise)}</strong></li>)}</ul><a className="text-action" href="#records" onClick={(event) => { event.preventDefault(); onSelectionChange({ recordCategory: "finance", month: selectedMonth.month }); }}>Open finance allocations <ArrowRight size={16} aria-hidden="true" /></a></div>
   </section>;
 }
 
@@ -107,7 +107,7 @@ export function ScenarioAllocationByCategory({ selection, onSelectionChange }: {
   const selected = allocations.find(({ category }) => category === selection.costCategory) ?? highest;
   return <section className="scenario-panel" aria-labelledby="scenario-category-title">
     <div className="scenario-panel-heading">
-      <div className="scenario-heading-label"><Layers3 size={19} aria-hidden="true" /><div><h2 id="scenario-category-title">Allocation mix</h2><p>Modelled share by cost group</p></div></div>
+      <h2 id="scenario-category-title">Illustrative cost categories</h2>
     </div>
     <ol className="scenario-category-list">{allocations.map((item) => <li className="scenario-category-row" key={item.id}>
       <button type="button" aria-pressed={selected.category === item.category} onClick={() => onSelectionChange({ costCategory: item.category })}>
@@ -116,7 +116,7 @@ export function ScenarioAllocationByCategory({ selection, onSelectionChange }: {
         <strong>₹{formatLakhsFromPaise(item.paise)}L <small>{(item.paise / illustrativeScenario.totalAllocationPaise * 100).toFixed(1)}%</small></strong>
       </button>
     </li>)}</ol>
-    <div className="scenario-selection-detail scenario-category-detail"><div><span>{selected.category} · model allocation</span><strong>₹{formatLakhsFromPaise(selected.paise)}L</strong></div><p>{formatMoney(selected.paise)} of the illustrative ₹{formatLakhsFromPaise(illustrativeScenario.totalAllocationPaise)} lakh model.</p><ol className="scenario-category-months" aria-label={`${selected.category} allocation by month`}>{illustrativeScenario.spendByMonth.map(({ month }) => {
+    <div className="scenario-selection-detail scenario-category-detail"><div><span>{selected.category} · model allocation</span><strong>₹{formatLakhsFromPaise(selected.paise)}L</strong></div><ol className="scenario-category-months" aria-label={`${selected.category} allocation by month`}>{illustrativeScenario.spendByMonth.map(({ month }) => {
       const paise = selected.monthly.find((entry) => entry.month === month)?.paise ?? 0;
       return <li key={month}><button type="button" aria-pressed={selection.month === month} onClick={() => onSelectionChange({ month, day: null, costCategory: selected.category })}><span>{formatDate(month).slice(0, 3)}</span><i><b style={{ width: `${selected.paise ? paise / selected.paise * 100 : 0}%` }} /></i><strong>₹{formatLakhsFromPaise(paise)}L</strong></button></li>;
     })}</ol><a className="text-action" href="#records" onClick={(event) => { event.preventDefault(); onSelectionChange({ recordCategory: "finance", costCategory: selected.category }); }}>Open this allocation <ArrowRight size={16} aria-hidden="true" /></a></div>
@@ -134,8 +134,7 @@ export function ScenarioAttendanceByMonth({ selection, onSelectionChange }: { se
   const daysInMonth = new Date(year, monthNumber, 0).getDate();
   return <section className="scenario-panel" aria-labelledby="scenario-attendance-title">
     <div className="scenario-panel-heading">
-      <div className="scenario-heading-label scenario-heading-label--labour"><HardHat size={19} aria-hidden="true" /><div><h2 id="scenario-attendance-title">Labour schedule</h2><p>Illustrative worker-days and assumed dates</p></div></div>
-      <div className="scenario-chart-insight scenario-chart-insight--labour"><UsersRound size={17} aria-hidden="true" /><span><strong>{illustrativeScenario.averageCrew.toFixed(2)}</strong> per assumed work date</span></div>
+      <h2 id="scenario-attendance-title">Illustrative labour schedule</h2>
     </div>
     <figure className="scenario-month-chart scenario-attendance-chart" aria-labelledby="scenario-attendance-title">
       <ol className="scenario-month-bars">
@@ -148,10 +147,11 @@ export function ScenarioAttendanceByMonth({ selection, onSelectionChange }: { se
           </button>
         </li>)}
       </ol>
-      <figcaption>Mon, Tue, Thu and Fri assumed as workdays. Sundays and other weekdays shown as assumed non-workdays.</figcaption>
+      <div className="scenario-attendance-selection" aria-live="polite"><span>{formatDate(selectedMonth.month)}</span><strong>{selectedMonth.workerDays} worker-days</strong><span>{selectedMonth.workedDates} assumed dates</span></div>
+      <figcaption>Assumed workdays: Mon, Tue, Thu and Fri.</figcaption>
     </figure>
     <section className="scenario-calendar" aria-label={`${formatDate(selectedMonth.month)} illustrative work calendar`}>
-      <div className="scenario-calendar-heading"><h3>{formatDate(selectedMonth.month)} calendar</h3><span>Tap a date for the model assumption</span></div>
+      <div className="scenario-calendar-heading"><h3>{formatDate(selectedMonth.month)}</h3></div>
       <div className="scenario-calendar-grid" role="group" aria-label={`Dates in ${formatDate(selectedMonth.month)}`}>
         {[["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((label) => <span className="scenario-calendar-weekday" key={label}>{label}</span>), ...Array.from({ length: leadingDays }, (_, index) => <span className="scenario-calendar-empty" key={`empty-${index}`} aria-hidden="true" />), ...Array.from({ length: daysInMonth }, (_, index) => {
           const day = index + 1;
@@ -182,7 +182,7 @@ export function ScenarioResourceSnapshot({ onSelectionChange }: { onSelectionCha
 
   return <section className="scenario-panel scenario-resource-panel" aria-labelledby="scenario-resource-title">
     <div className="scenario-panel-heading">
-      <div className="scenario-heading-label"><Package size={19} aria-hidden="true" /><div><h2 id="scenario-resource-title">Materials &amp; equipment</h2><p>{materialNames.length} of {allMaterialNames.length} material types · illustrative quantities</p></div></div>
+      <h2 id="scenario-resource-title">Illustrative materials &amp; equipment</h2>
       <a className="scenario-resource-action" href="#records" aria-label="Open the illustrative materials register" title="Open the illustrative materials register" onClick={(event) => { event.preventDefault(); onSelectionChange({ recordCategory: "materials", month: null, costCategory: null, day: null }); }}><ArrowRight size={19} aria-hidden="true" /></a>
     </div>
     <div className="scenario-resource-snapshot-list">

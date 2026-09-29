@@ -17,10 +17,10 @@ const categories: { id: Category; label: string; icon: typeof ReceiptText }[] = 
 ];
 
 const emptyCopy: Record<Category, { title: string; text: string; note: string }> = {
-  finance: { title: "No financial entries have been published.", text: "The register will separate quotations, bills, payments and refunds when their dates and amounts are established.", note: "A quotation does not become spending. The spend total starts with documented payments and subtracts documented refunds." },
-  labour: { title: "No attendance dates have been published.", text: "Workday and worker counts will appear here when dated attendance is established.", note: "An unrecorded date is unknown. A date with confirmed work and two workers counts as one workday and two worker-days." },
-  materials: { title: "No material quantities have been published.", text: "Purchases, deliveries and use will appear here as separate dated events with their units.", note: "Purchase, delivery and use are separate events. A supplier mention never establishes a quantity." },
-  equipment: { title: "No equipment events have been published.", text: "JCB, tractor and other equipment entries will appear here when their dates and units are established.", note: "Equipment events keep their own date, action, quantity and unit, such as days or trips." }
+  finance: { title: "No financial entries yet", text: "Quotes, bills, payments and refunds will appear when dated.", note: "Only payments less refunds count as recorded spending; quotes and bills do not." },
+  labour: { title: "Attendance unrecorded", text: "Dated work and crew counts will appear here.", note: "Unrecorded dates are unknown, not days off. Two workers on one date count as two worker-days." },
+  materials: { title: "Material quantities unrecorded", text: "Purchases, deliveries and use will appear as dated events.", note: "A purchase is not proof of delivery or use; units remain separate." },
+  equipment: { title: "Equipment use unrecorded", text: "Dated JCB and tractor events will appear here.", note: "Days and trips remain separate units." }
 };
 
 const kindLabel: Record<FinanceRecord["kind"], string> = { quote: "Quotation", invoice: "Bill", payment: "Payment", refund: "Refund" };
@@ -68,7 +68,6 @@ export function RecordsView({ records, mode, selection, onSelectionChange }: { r
   const category: Category = selection.recordCategory;
   const [search, setSearch] = useState("");
   const EmptyCategoryIcon = categories.find(({ id }) => id === category)!.icon;
-  const selectedCategory = categories.find(({ id }) => id === category)!;
   const counts: Record<Category, number> = { finance: records.finance.length, labour: records.attendance.length, materials: records.materials.length, equipment: records.equipment.length };
   const hasAnyRecord = Object.values(counts).some((count) => count > 0);
   const spent = recordedSpend(records);
@@ -82,9 +81,9 @@ export function RecordsView({ records, mode, selection, onSelectionChange }: { r
   if (mode === "scenario") return <ScenarioRecordsView status={records.currentStatus} selection={selection} onSelectionChange={onSelectionChange} />;
 
   return <>
-    <header className="view-intro"><div className="view-intro-line"><div><h1>Records</h1><p>Spending, labour, materials and equipment are dated separately. Totals use only supporting entries.</p></div></div></header>
+    <header className="view-intro"><h1>Records</h1></header>
     <div className="records-primary">
-      <section className="records-surface" aria-labelledby="register-title"><div className="records-header"><div><h2 id="register-title">{selectedCategory.label} entries</h2></div></div>
+      <section className="records-surface" aria-labelledby="owner-register-title"><h2 className="sr-only" id="owner-register-title">Owner register</h2>
         <div className="category-tabs" role="group" aria-label="Record type">{categories.map(({ id, label }) => <button className="category-tab" type="button" key={id} aria-pressed={category === id} onClick={() => { onSelectionChange({ recordCategory: id }); setSearch(""); }}><span>{label}</span></button>)}</div>
         {counts[category] > 0 && <div className="records-toolbar"><label className="record-search"><Search size={17} aria-hidden="true" /><span className="sr-only">Search {category} records</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${category} records`} /></label><span>Newest first</span></div>}
         <div className="records-body">{filtered.length ? filtered.map((item) => {
@@ -92,7 +91,7 @@ export function RecordsView({ records, mode, selection, onSelectionChange }: { r
           if (category === "labour") return <LabourRow key={item.id} item={item as AttendanceRecord} />;
           if (category === "materials") return <MaterialRow key={item.id} item={item as MaterialRecord} />;
           return <EquipmentRow key={item.id} item={item as EquipmentRecord} />;
-        }) : counts[category] ? <div className="empty-record empty-record--search"><Search size={24} strokeWidth={1.6} aria-hidden="true" /><h3>No matching records.</h3><p>Try a different search term.</p></div> : <div className="empty-record"><span className="empty-record-icon"><EmptyCategoryIcon size={21} strokeWidth={1.7} aria-hidden="true" /></span><div className="empty-record-copy"><h3>{emptyCopy[category].title}</h3><p>{emptyCopy[category].text}</p></div><div className="empty-record-rule"><span className="overline">How this is counted</span><p>{emptyCopy[category].note}</p></div></div>}</div>
+        }) : counts[category] ? <div className="empty-record empty-record--search"><Search size={24} strokeWidth={1.6} aria-hidden="true" /><h3>No matching records.</h3><p>Try a different search term.</p></div> : <div className="empty-record owner-empty-record"><span className="empty-record-icon"><EmptyCategoryIcon size={21} strokeWidth={1.7} aria-hidden="true" /></span><div className="empty-record-copy"><h3>{emptyCopy[category].title}</h3><p>{emptyCopy[category].text}</p></div><details className="empty-record-rule"><summary>How this is counted</summary><p>{emptyCopy[category].note}</p></details></div>}</div>
       </section>
       {hasAnyRecord && <div className="record-metrics" aria-label="Recorded measures"><div><span>Itemised recorded spend</span><strong className="tabular-nums">{spent === null ? "Not recorded" : formatMoney(spent)}</strong><small>{spent === null ? `Owner-reported overall range: ${formatMoney(records.currentStatus.reportedSpendRangePaise[0])}–${formatMoney(records.currentStatus.reportedSpendRangePaise[1])}; payments are not itemised.` : "Payments less refunds"}</small></div><div><span>Dates with work</span><strong className="tabular-nums">{work.workdays === null ? "Not recorded" : work.workdays}</strong><small>Confirmed attendance dates</small></div><div><span>Worker-days</span><strong className="tabular-nums">{work.workerDays === null ? "Not recorded" : `${work.incomplete ? "At least " : ""}${work.workerDays}`}</strong><small>Sum of known daily headcounts</small></div></div>}
     </div>
