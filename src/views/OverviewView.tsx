@@ -42,8 +42,8 @@ export function OverviewView({ records, mode, selection, onSelectionChange }: { 
         <div className={`overview-measure overview-measure--labour${mode === "record" ? " is-unrecorded" : ""}`}>
           <span className="overview-measure-label">{mode === "scenario" ? "Illustrative labour" : "Labour attendance"}</span>
           <strong>{mode === "scenario" ? <>{illustrativeScenario.workerDays} <span>worker-days</span></> : "Unrecorded"}</strong>
+          {mode === "scenario" && <p>{illustrativeScenario.workedDates} assumed dates · crew of 2–3</p>}
         </div>
-        {mode === "scenario" && <div className="overview-labour-context"><dl><div><dt>Assumed dates</dt><dd>{illustrativeScenario.workedDates}</dd></div><div><dt>Crew per date</dt><dd>2–3</dd></div></dl><details><summary>Worker-day definition</summary><p>One worker on one assumed work date is one worker-day. This model is not actual attendance or a count of distinct people or hours.</p></details></div>}
       </div>
     </section>
 
